@@ -1,0 +1,18 @@
+{
+    "execution_timestamp": "2026-04-07T03:16:04.903013",
+    "pipeline_stage": "feature_extraction_sdp",
+    "params": {
+        "n_lag": 20,
+        "wt": 100,
+        "hop": 50,
+        "n_windows": 1,
+        "feature_dim": 2000
+    },
+    "summary": {
+        "total_files": 922,
+        "success": 922,
+        "failed": 0,
+        "elapsed_sec": 11.3
+    },
+    "failures": []
+}

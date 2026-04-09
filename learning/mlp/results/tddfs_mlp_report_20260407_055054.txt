@@ -1,0 +1,26 @@
+TD-DFS-MLP Classification Report
+Timestamp  : 20260407_055054
+Feature    : TD-DFS velocity time series → 19-dim statistical vector
+             Δt search [1, 10]  fc=5.180GHz
+Feature names: ['mean_v', 'std_v', 'median_v', 'min_v', 'max_v', 'rms_v', 'iqr_v', 'pos_ratio', 'neg_ratio', 'zero_cross', 'skewness', 'kurtosis', 'low_energy', 'high_energy', 'peak_speed', 'peak_fdop', 'diff_mean_abs', 'diff_std', 'diff_max_abs']
+Hidden     : [128, 64, 32]  Activation=relu
+Epochs     : 300  LR=0.001
+Train/Test : 737 / 185
+
+Test Accuracy: 0.7459
+
+              precision    recall  f1-score   support
+
+         big       0.83      0.67      0.74       100
+       small       0.68      0.84      0.75        85
+
+    accuracy                           0.75       185
+   macro avg       0.75      0.75      0.75       185
+weighted avg       0.76      0.75      0.75       185
+
+Confusion Matrix:
+[[67 33]
+ [14 71]]
+
+5-Fold CV: [0.7081, 0.6919, 0.6793, 0.7283, 0.7337]
+CV Mean: 0.7083  CV Std: 0.0207

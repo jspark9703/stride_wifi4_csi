@@ -1,0 +1,20 @@
+{
+    "wavelet": "sym3",
+    "level": 10,
+    "n_pca": 6,
+    "hidden": [
+        256,
+        128,
+        64
+    ],
+    "activation": "relu",
+    "classes": [
+        "big",
+        "small"
+    ],
+    "feature_dim": 54,
+    "test_accuracy": 0.9297297297297298,
+    "cv_mean": 0.9273443008225616,
+    "cv_std": 0.012585715042955267,
+    "timestamp": "20260407_035008"
+}

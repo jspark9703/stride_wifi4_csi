@@ -1,0 +1,42 @@
+{
+    "feature_type": "tddfs_stat",
+    "feat_dim": 19,
+    "feat_names": [
+        "mean_v",
+        "std_v",
+        "median_v",
+        "min_v",
+        "max_v",
+        "rms_v",
+        "iqr_v",
+        "pos_ratio",
+        "neg_ratio",
+        "zero_cross",
+        "skewness",
+        "kurtosis",
+        "low_energy",
+        "high_energy",
+        "peak_speed",
+        "peak_fdop",
+        "diff_mean_abs",
+        "diff_std",
+        "diff_max_abs"
+    ],
+    "delta_t_min": 1,
+    "delta_t_max": 10,
+    "fc_hz": 5180000000.0,
+    "hidden": [
+        128,
+        64,
+        32
+    ],
+    "activation": "relu",
+    "classes": [
+        "big",
+        "small"
+    ],
+    "test_accuracy": 0.745945945945946,
+    "cv_mean": 0.7082608695652174,
+    "cv_std": 0.020740583480992128,
+    "timestamp": "20260407_055054"
+}

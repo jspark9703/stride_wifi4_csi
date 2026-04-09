@@ -1,0 +1,19 @@
+{
+    "n_lag": 20,
+    "wt": 100,
+    "hidden": [
+        512,
+        256,
+        128
+    ],
+    "activation": "relu",
+    "classes": [
+        "big",
+        "small"
+    ],
+    "feature_dim": 2000,
+    "test_accuracy": 0.5945945945945946,
+    "cv_mean": 0.5314688601645123,
+    "cv_std": 0.027244573547986952,
+    "timestamp": "20260407_035033"
+}

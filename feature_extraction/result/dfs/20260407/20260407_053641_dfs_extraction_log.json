@@ -1,0 +1,19 @@
+{
+    "execution_timestamp": "2026-04-07T05:36:54.581101",
+    "pipeline_stage": "feature_extraction_dfs",
+    "params": {
+        "n_fft": 64,
+        "hop": 4,
+        "doppler_hz": 50.0,
+        "window": "hanning",
+        "fs_hz": 100,
+        "n_valid_freq_approx": 64
+    },
+    "summary": {
+        "total_files": 922,
+        "success": 922,
+        "failed": 0,
+        "elapsed_sec": 12.85
+    },
+    "failures": []
+}

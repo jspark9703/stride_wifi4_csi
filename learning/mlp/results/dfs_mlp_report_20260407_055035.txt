@@ -1,0 +1,26 @@
+DFS-MLP Classification Report
+Timestamp  : 20260407_055035
+Feature    : DFS Power Spectrogram → Freq-axis stats (mean/std/max/skew per bin)
+             n_fft=64, hop=4, doppler_hz=±50.0Hz
+             Raw dim=256  →  PCA n_components=32
+Hidden     : [256, 128, 64]  Activation=relu
+Epochs     : 300  LR=0.001
+Train/Test : 737 / 185
+
+Test Accuracy: 0.7297
+
+              precision    recall  f1-score   support
+
+         big       0.78      0.69      0.73       100
+       small       0.68      0.78      0.73        85
+
+    accuracy                           0.73       185
+   macro avg       0.73      0.73      0.73       185
+weighted avg       0.74      0.73      0.73       185
+
+Confusion Matrix:
+[[69 31]
+ [19 66]]
+
+5-Fold CV: [0.7514, 0.7135, 0.7283, 0.7772, 0.7554]
+CV Mean: 0.7451  CV Std: 0.0222

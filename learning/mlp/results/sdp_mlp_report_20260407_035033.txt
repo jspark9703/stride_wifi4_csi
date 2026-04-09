@@ -1,0 +1,21 @@
+SDP-MLP Classification Report
+Timestamp : 20260407_035033
+Feature   : SDP (n_lag=20, wt=100)
+Hidden    : [512, 256, 128]
+Epochs    : 300  LR=0.001
+Train/Test: 737 / 185
+
+Test Accuracy: 0.5946
+
+              precision    recall  f1-score   support
+
+         big       0.60      0.73      0.66       100
+       small       0.58      0.44      0.50        85
+
+    accuracy                           0.59       185
+   macro avg       0.59      0.58      0.58       185
+weighted avg       0.59      0.59      0.59       185
+
+Confusion Matrix:
+[[73 27]
+ [48 37]]

@@ -1,0 +1,30 @@
+{
+    "execution_timestamp": "2026-04-07T05:38:01.559591",
+    "pipeline_stage": "feature_extraction_tddfs",
+    "params": {
+        "delta_t_min": 1,
+        "delta_t_max": 10,
+        "fc_hz": 5180000000.0,
+        "lambda_m": 0.05791505791505792,
+        "fs_hz": 100
+    },
+    "summary": {
+        "total_files": 922,
+        "success": 922,
+        "failed": 0,
+        "elapsed_sec": 10.54
+    },
+    "delta_t_distribution": {
+        "10": 87,
+        "3": 24,
+        "9": 60,
+        "4": 36,
+        "7": 59,
+        "8": 57,
+        "2": 29,
+        "1": 501,
+        "6": 29,
+        "5": 40
+    },
+    "failures": []
+}

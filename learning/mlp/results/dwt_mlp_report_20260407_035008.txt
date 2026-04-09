@@ -1,0 +1,21 @@
+DWT-MLP Classification Report
+Timestamp : 20260407_035008
+Feature   : DWT (wavelet=sym3, level=10, n_pca=6)
+Hidden    : [256, 128, 64]
+Epochs    : 300  LR=0.001
+Train/Test: 737 / 185
+
+Test Accuracy: 0.9297
+
+              precision    recall  f1-score   support
+
+         big       0.91      0.96      0.94       100
+       small       0.95      0.89      0.92        85
+
+    accuracy                           0.93       185
+   macro avg       0.93      0.93      0.93       185
+weighted avg       0.93      0.93      0.93       185
+
+Confusion Matrix:
+[[96  4]
+ [ 9 76]]

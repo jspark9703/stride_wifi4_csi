@@ -1,0 +1,54 @@
+{
+    "execution_timestamp": "2026-04-06T23:08:14.658568",
+    "pipeline_stage": "preprocessing",
+    "hyperparameters": {
+        "target_fs": 100,
+        "max_interp_gap_ms": 20.0
+    },
+    "summary": {
+        "total_files": 922,
+        "success": 922,
+        "failed": 0,
+        "execution_time_sec": 132.09
+    },
+    "sample_gap_stats_from_data": {
+        "overall_gap_stats_all_pairs": {
+            "pair_count": 119,
+            "mean_us": 11739.495798319329,
+            "std_us": 3744.939857420479,
+            "median_us": 11000.00000000001,
+            "p90_us": 15000.000000000013,
+            "p95_us": 20100.0,
+            "p99_us": 22000.00000000002,
+            "max_us": 32999.99999999992
+        },
+        "overall_gap_stats_trimmed_le_p99": {
+            "pair_count": 118,
+            "mean_us": 11559.322033898306,
+            "std_us": 3206.303042661256,
+            "median_us": 11000.00000000001
+        },
+        "valid_csi_pair_gap_quantiles_us": {
+            "q10": 9000.000000000007,
+            "q25": 10000.00000000001,
+            "q50": 11000.00000000001,
+            "q75": 12000.000000000011,
+            "q90": 15000.000000000013,
+            "q95": 20100.0,
+            "q99": 22000.00000000002
+        },
+        "small_gap_group": {
+            "definition": "gap <= q25",
+            "count": 42,
+            "gap_mean_us": 9023.809523809537,
+            "amp_diff_mean": 16.981292724609375
+        },
+        "large_gap_group": {
+            "definition": "gap >= q75",
+            "count": 41,
+            "gap_mean_us": 15073.170731707309,
+            "amp_diff_mean": 18.853559494018555
+        }
+    },
+    "failures": []
+}

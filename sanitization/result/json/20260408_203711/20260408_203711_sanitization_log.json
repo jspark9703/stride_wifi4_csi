@@ -1,0 +1,21 @@
+{
+    "execution_timestamp": "2026-04-08T20:41:21.542602",
+    "pipeline_stage": "sanitization",
+    "sanitization_quality_avg": {
+        "mean_r_squared": 0.3085167330289336,
+        "phase_stability_score": 95.24324786324786,
+        "amplitude_cv_mean": 0.49210341880341874
+    },
+    "algorithm_info": {
+        "phase": "Least-Squares Linear Fitting Only",
+        "amplitude": "Disabled (No Template)",
+        "outlier_filter": "Disabled"
+    },
+    "summary": {
+        "total_files": 117,
+        "success": 117,
+        "failed": 0,
+        "execution_time_sec": 18.2
+    },
+    "failures": []
+}

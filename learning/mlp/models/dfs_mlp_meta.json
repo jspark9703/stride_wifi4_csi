@@ -1,0 +1,22 @@
+{
+    "feature_type": "dfs_stat",
+    "n_fft": 64,
+    "hop": 4,
+    "doppler_hz": 50.0,
+    "raw_feat_dim": 256,
+    "n_pca": 32,
+    "hidden": [
+        256,
+        128,
+        64
+    ],
+    "activation": "relu",
+    "classes": [
+        "big",
+        "small"
+    ],
+    "test_accuracy": 0.7297297297297297,
+    "cv_mean": 0.7451468860164513,
+    "cv_std": 0.022162465901047947,
+    "timestamp": "20260407_055035"
+}
