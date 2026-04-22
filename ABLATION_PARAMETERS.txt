@@ -1,0 +1,271 @@
+================================================================================
+                        ABLATION PARAMETERS REFERENCE
+                    WiFi CSI Stride Classification Pipeline
+================================================================================
+
+Legend:
+  ✅ Ablation 권장
+  ⭐ 높은 우선순위
+  ⚠️  주의 필요
+  ❌ 고정됨
+  🔧 변경 가능하나 영향 낮음
+
+================================================================================
+MODULE 1: PREPROCESSING
+File: sanitization/main_pipeline.py, sanitization/scripts/preprocess.py
+================================================================================
+
+Parameter Name          Type    Default    Min-Max         Status   Notes
+────────────────────────────────────────────────────────────────────────────
+
+target_fs              int     100        50-200          ✅       샘플링 주파수
+                                                                    예: --target_fs 100
+
+hampel_enabled         bool    True       {True,False}    ⭐✅     이상치 필터
+                                                                    예: --hampel_enabled or --no-hampel_enabled
+
+hampel_window          int     7          3-11(홀수)      ✅       필터 윈도우
+                                                                    예: --hampel_window 5
+
+hampel_threshold       float   5.0        1.0-10.0        ✅       임계값
+                                                                    예: --hampel_threshold 3.0
+
+lowpass_enabled        bool    False      {True,False}    ✅       저주파 필터
+                                                                    예: --lowpass_enabled (on) / --no-lowpass_enabled (off)
+
+lowpass_cutoff         float   11.0       5.0-20.0        🔧       차단 주파수
+                                                                    예: --lowpass_cutoff 10.0
+
+max_gap_ms             float   20.0       5.0-50.0        🔧       보간 기준 갭
+                                                                    예: --max_gap_ms 20.0
+
+================================================================================
+MODULE 2-A: FEATURE EXTRACTION - DWT (Discrete Wavelet Transform)
+File: feature_extraction/dwt/extract_dwt.py
+================================================================================
+
+Parameter Name          Type    Default    Min-Max         Status   Notes
+────────────────────────────────────────────────────────────────────────────
+
+wavelet                str     "sym3"     모든 PyWavelets ⭐✅     웨이블릿 종류
+                                         (db2, coif1 등)           예: --wavelet db2
+
+level                  int     10         3-12            ⭐✅     분해 레벨
+                                                                    예: --level 8
+                                                                    주의: 특징 차원 변함
+                                                                    dim = n_pca × (level+1)
+
+n_pca                  int     6          3-20            ⭐✅     PCA 주성분
+                                                                    예: --n_pca 12
+                                                                    주의: 특징 차원 변함
+
+sanit_dir              str     data/...   -               ❌       입력 디렉토리 (고정)
+
+out_dir                str     data/...   -               🔧       출력 디렉토리
+                                                                    예: --out_dir data/feature_extraction/dwt_custom
+
+================================================================================
+MODULE 2-B: FEATURE EXTRACTION - DFS (Doppler Frequency Spectrum)
+File: feature_extraction/dfs/extract_dfs.py
+================================================================================
+
+Parameter Name          Type    Default    Min-Max         Status   Notes
+────────────────────────────────────────────────────────────────────────────
+
+n_fft                  int     64         32-256          ⭐✅     STFT FFT 크기
+                                                                    예: --n_fft 128
+                                                                    주의: 시간-주파수 해상도 트레이드오프
+
+hop                    int     4          1-16            ⭐✅     STFT hop 크기
+                                                                    예: --hop 8
+
+doppler_hz             float   50         10-50           🔧       도플러 대역
+                                                                    예: --doppler_hz 30
+                                                                    주의: ±doppler_hz Hz 범위만 보존
+
+save_npy               bool    False      {True,False}    🔧       .npy 파일 저장
+                                                                    예: --save_npy
+
+save_img               bool    False      {True,False}    🔧       .png 이미지 저장
+                                                                    예: --save_img
+
+================================================================================
+MODULE 2-C: FEATURE EXTRACTION - SDP (Spatial Doppler Profile)
+File: feature_extraction/sdp/extract_sdp.py
+================================================================================
+
+Parameter Name          Type    Default    Min-Max         Status   Notes
+────────────────────────────────────────────────────────────────────────────
+
+n_lag                  int     20         10-50           ✅       ACF lag 수
+                                                                    예: --n_lag 30
+
+wt                     int     100        50-200          ✅       윈도우 패킷 수
+                                                                    예: --wt 150
+
+hop                    int     50         25-100          🔧       윈도우 이동 간격
+                                                                    예: --hop 75
+
+n_windows              int     1          1-5             🔧       추출 윈도우 수
+                                                                    예: --n_windows 3
+                                                                    주의: 1=중앙 윈도우만
+
+================================================================================
+MODULE 3: LEARNING - MLP (공통, DWT/DFS/SDP/TD-DFS)
+File: learning/mlp/{dwt,dfs,sdp,tddfs}_mlp.py
+================================================================================
+
+Parameter Name          Type    Default    Min-Max         Status   Notes
+────────────────────────────────────────────────────────────────────────────
+
+hidden                 list    [256,128,64] 가변           ⭐✅     은닉층 구조
+                                                                    예: --hidden 512 256 128
+                                                                    또는: --hidden 128 64 32
+
+activation             str     "relu"     {relu,tanh,      ✅       활성화 함수
+                                          logistic}                예: --activation tanh
+
+epochs                 int     300        100-1000        ✅       최대 반복 횟수
+                                                                    예: --epochs 500
+
+lr                     float   1e-3       1e-5 ~ 1e-1     ✅       초기 학습률
+                                                                    예: --lr 1e-4
+
+solver                 str     "adam"     {adam,sgd,       ❌       최적화 알고리즘 (고정)
+                                          lbfgs}
+
+batch_size             int     64         16-128          ❌       배치 크기 (고정)
+                                                                    현재: 64 (코드 상 고정)
+
+random_state           int     42         -               ❌       난수 시드 (고정)
+                                                                    재현성 보장
+
+early_stopping         bool    True       {True,False}    ❌       조기 종료 (고정)
+
+validation_fraction    float   0.1        0.05-0.2        ❌       검증 비율 (고정)
+
+n_iter_no_change       int     20         10-50           ❌       조기 종료 기준 (고정)
+
+alpha (L2)             float   1e-4       1e-5 ~ 1e-2     ❌       L2 정규화 (고정)
+
+learning_rate          str     "adaptive" {constant,       ❌       학습률 스케줄 (고정)
+                                          invscaling,
+                                          adaptive}
+
+================================================================================
+MODULE 4: SANITIZATION & CALIBRATION
+File: sanitization/main_pipeline.py, sanitization/scripts/sanitization.py
+================================================================================
+
+Parameter Name          Type    Default    Min-Max         Status   Notes
+────────────────────────────────────────────────────────────────────────────
+
+enable_ratio           bool    False      {True,False}    ✅       CSI Ratio 활성화
+                                                                    예: --enable_ratio
+
+template_csv           str     "sanit...  -               🔧       템플릿 경로
+
+calib_dir              str     "calibr... -               ❌       캘리브레이션 디렉토리
+
+linear_start           int     30         20-40           ✅       선형 부반송파 시작
+                                                                    예: --linear_start 25
+
+linear_end             int     78         60-90           ✅       선형 부반송파 끝
+                                                                    예: --linear_end 85
+
+hist_bins              int     100        50-200          🔧       히스토그램 빈 수
+
+hist_range_max         int     40         20-60           🔧       히스토그램 범위
+
+================================================================================
+QUICK PARAMETER COMBINATIONS (자주 사용되는 조합)
+================================================================================
+
+[1] Baseline (기본값)
+────────────────────
+Preprocessing:  target_fs=100, hampel_enabled=True, lowpass_enabled=False
+DWT:            wavelet=sym3, level=10, n_pca=6
+DFS:            n_fft=64, hop=4, doppler_hz=50
+MLP:            hidden=[256,128,64], activation=relu, epochs=300, lr=1e-3
+
+Expected Result: ~85.67% accuracy (5-Fold CV: 85.12% ± 0.98%)
+
+────────────────────────────────────────────────────────────────────────────
+
+[2] Minimal Feature (빠른 실험용)
+────────────────────
+DWT:            level=5, n_pca=3
+Expected:       ~82% accuracy, 2분 학습
+
+Command:
+python feature_extraction/dwt/extract_dwt.py --level 5 --n_pca 3
+python learning/mlp/dwt_mlp.py
+
+────────────────────────────────────────────────────────────────────────────
+
+[3] Enhanced Feature (성능 최적화)
+────────────────────
+DWT:            level=12, n_pca=12, wavelet=db2
+Expected:       ~87% accuracy, 5분 학습
+
+Command:
+python feature_extraction/dwt/extract_dwt.py --level 12 --n_pca 12 --wavelet db2
+python learning/mlp/dwt_mlp.py --hidden 512 256 128 --epochs 500
+
+────────────────────────────────────────────────────────────────────────────
+
+[4] Deep Model (모델 심화)
+────────────────────
+MLP:            hidden=[512,256,128,64], activation=relu, epochs=500
+Expected:       +0.5~1% 개선 가능, 하지만 과피팅 위험
+
+Command:
+python learning/mlp/dwt_mlp.py --hidden 512 256 128 64 --epochs 500
+
+════════════════════════════════════════════════════════════════════════════════
+
+ABBREVIATIONS / 약자
+════════════════════════════════════════════════════════════════════════════════
+
+DWT  : Discrete Wavelet Transform (이산 웨이블릿 변환)
+DFS  : Doppler Frequency Spectrum (도플러 주파수 스펙트럼)
+SDP  : Spatial Doppler Profile (공간 도플러 프로필)
+MLP  : Multi-Layer Perceptron (다층 퍼셉트론)
+PCA  : Principal Component Analysis (주성분 분석)
+STFT : Short-Time Fourier Transform (단시간 푸리에 변환)
+ACF  : Auto-Correlation Function (자기상관함수)
+CSI  : Channel State Information (채널 상태 정보)
+FFT  : Fast Fourier Transform (고속 푸리에 변환)
+CV   : Cross-Validation (교차 검증)
+L2   : L2 정규화 (가중치 감소)
+
+════════════════════════════════════════════════════════════════════════════════
+
+DECISION TREE: 어떤 파라미터를 먼저 조정할까?
+════════════════════════════════════════════════════════════════════════════════
+
+성능이 낮다면? (80% 이하)
+  → 1️⃣ Hampel Filter 상태 확인
+  → 2️⃣ DWT level 증가 (10 → 12)
+  → 3️⃣ n_pca 증가 (6 → 12)
+  → 4️⃣ MLP hidden_layers 증가 (256,128,64 → 512,256,128)
+
+성능은 좋지만 느리다면? (85% 이상, 5분 이상)
+  → 1️⃣ level 감소 (10 → 8)
+  → 2️⃣ n_pca 감소 (6 → 4)
+  → 3️⃣ hidden 축소 (256,128,64 → 128,64,32)
+
+성능이 불안정하다면? (CV Std > 0.02)
+  → 1️⃣ target_fs 변경 시도 (100 → 50)
+  → 2️⃣ hampel_window 조정 (7 → 5 또는 9)
+  → 3️⃣ 데이터 확인 (이상 샘플 있는지)
+
+특정 클래스가 잘 분류되지 않는다면?
+  → 1️⃣ Confusion Matrix 분석
+  → 2️⃣ n_pca 증가 (특징 정보량 확대)
+  → 3️⃣ hidden_layers 구조 변경 (깊이/폭 조정)
+
+════════════════════════════════════════════════════════════════════════════════
+마지막 업데이트: 2026-04-23
+문의: ABLATION_ANALYSIS.md, ABLATION_QUICK_START.md 참고
+════════════════════════════════════════════════════════════════════════════════
