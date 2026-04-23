@@ -1,0 +1,9 @@
+# Ablation: DWT 웨이블릿 함수 종류
+base_config: "configs/default.yaml"
+
+sweep:
+  - param: "feature_extraction.dwt.wavelet"
+    values: ["sym3", "db2", "coif1", "haar"]
+
+overrides:
+  experiment.steps: [extract, train]

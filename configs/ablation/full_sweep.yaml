@@ -1,0 +1,21 @@
+# Ablation: 복합 파라미터 순차 스윕
+# 각 param 그룹을 독립적으로 (나머지는 기본값 유지)
+base_config: "configs/default.yaml"
+
+sweep:
+  - param: "sliding_window.window_sec"
+    values: [0.8, 0.9, 1.0]
+  - param: "feature_extraction.dwt.level"
+    values: [5, 8, 10, 12]
+  - param: "feature_extraction.dwt.n_pca"
+    values: [3, 6, 12]
+  - param: "learning.hidden"
+    values:
+      - [128, 64, 32]
+      - [256, 128, 64]
+      - [512, 256, 128]
+
+overrides:
+  sliding_window.enabled: true
+  sliding_window.hop_sec: 0.5
+  experiment.steps: [extract, train]

@@ -1,0 +1,12 @@
+# Ablation: 슬라이딩 윈도우 활성화 여부
+# 전체 신호 vs 1초 윈도우 분할 성능 비교
+base_config: "configs/default.yaml"
+
+sweep:
+  - param: "sliding_window.enabled"
+    values: [false, true]
+
+overrides:
+  sliding_window.window_sec: 1.0
+  sliding_window.hop_sec: 0.5
+  experiment.steps: [extract, train]

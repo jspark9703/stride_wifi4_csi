@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir -p \"c:/Users/jspar/Desktop/SCHOOL/idealab/WIFI_CSI/project_csi/demo/stride_wifi4/pipeline\")",
+      "Bash(mkdir -p \"c:/Users/jspar/Desktop/SCHOOL/idealab/WIFI_CSI/project_csi/demo/stride_wifi4/configs/ablation\")"
+    ]
+  }
+}

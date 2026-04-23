@@ -1,0 +1,13 @@
+# Ablation: 슬라이딩 윈도우 크기 (0.8 / 0.9 / 1.0초)
+# 온라인 학습 대응 — 짧은 윈도우 vs 긴 윈도우 성능 비교
+base_config: "configs/default.yaml"
+
+sweep:
+  - param: "sliding_window.window_sec"
+    values: [0.8, 0.9, 1.0]
+    # 0.8s=80samp, 0.9s=90samp, 1.0s=100samp @ 100Hz
+
+overrides:
+  sliding_window.enabled: true
+  sliding_window.hop_sec: 0.5
+  experiment.steps: [extract, train]

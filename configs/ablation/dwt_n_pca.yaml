@@ -1,0 +1,9 @@
+# Ablation: DWT PCA 주성분 수
+base_config: "configs/default.yaml"
+
+sweep:
+  - param: "feature_extraction.dwt.n_pca"
+    values: [3, 6, 9, 12, 20]
+
+overrides:
+  experiment.steps: [extract, train]

@@ -1,0 +1,88 @@
+# ============================================================
+#  WiFi CSI Stride Classification — Default Config (Baseline)
+# ============================================================
+
+experiment:
+  name: "baseline"
+  date_tag: "260406"          # data/raw/{date_tag}/ 폴더명
+  steps:                       # 실행할 스텝 (순서대로)
+    - extract                  # preprocess / sanitize / window / extract / train
+    - train
+
+# ────────────────────────────────────────────────────────────
+#  전처리 (Preprocessing)
+# ────────────────────────────────────────────────────────────
+preprocessing:
+  target_fs: 100               # 목표 샘플링 주파수 [Hz]
+  max_gap_ms: 20.0             # 보간 기준 최대 갭 [ms]
+
+  hampel_enabled: false         # Hampel 이상치 필터 (ablation 가능)
+  hampel_window: 7             # 필터 윈도우 크기 (홀수, 3~11)
+  hampel_threshold: 5.0        # 이상치 임계값 (1.0~10.0)
+
+  lowpass_enabled: false       # Butterworth 저역통과 필터 (ablation 가능)
+  lowpass_cutoff: 11.0         # 차단 주파수 [Hz] (5.0~20.0)
+
+# ────────────────────────────────────────────────────────────
+#  위상/진폭 보정 (Sanitization)
+# ────────────────────────────────────────────────────────────
+sanitization:
+  enable_ratio: false          # CSI Ratio 사용 (다중 안테나, ablation 가능)
+  make_template: false          # 캘리브레이션 CSV → template 자동 생성
+  template_csv: "sanitization/template/template.csv"
+  calib_dir: "calibration"
+  linear_start: 30             # 선형 부반송파 구간 시작 인덱스 (ablation 가능)
+  linear_end: 78               # 종료 인덱스 (exclusive)
+  hist_bins: 100               # 시각화용 히스토그램 빈
+  hist_range_max: 40           # 히스토그램 X축 최대값 [ms]
+
+# ────────────────────────────────────────────────────────────
+#  슬라이딩 윈도우 (Online Learning 대응)
+#  온라인 추론 시 0.8~1초 단위 윈도우로 실시간 분류를 산정
+# ────────────────────────────────────────────────────────────
+sliding_window:
+  enabled: false               # 슬라이딩 윈도우 활성화 여부 (ablation 가능)
+  window_sec: 1.0              # 윈도우 크기 [초] (0.8 | 0.9 | 1.0 — ablation 가능)
+  hop_sec: 0.5                 # hop 크기 [초] (overlap = 1 - hop/window)
+  # window_sec=1.0 → 100샘플 @ 100Hz  (online 추론 가정: 1초)
+  # window_sec=0.8 → 80샘플  @ 100Hz  (빠른 반응 버전)
+  # hop_sec=0.5   → 50% overlap (데이터 증강 효과)
+  # hop_sec=0.1   → 90% overlap (최대 증강, 느린 추론)
+
+# ────────────────────────────────────────────────────────────
+#  특징 추출 (Feature Extraction)
+# ────────────────────────────────────────────────────────────
+feature_extraction:
+  method: "dwt"                # dwt | dfs | sdp | tddfs  (ablation 가능)
+
+  dwt:                         # Discrete Wavelet Transform
+    wavelet: "sym3"            # 웨이블릿 함수 (ablation 가능: db2, coif1, ...)
+    level: 10                  # 분해 레벨 (ablation 가능: 5~15)
+    n_pca: 6                   # PCA 주성분 수 (ablation 가능: 3~20)
+    # 특징 차원 = n_pca × (level + 1) = 6 × 11 = 66
+
+  dfs:                         # Doppler Frequency Spectrum (STFT 기반)
+    n_fft: 64                  # FFT 크기 (ablation 가능: 32 | 64 | 128)
+    hop: 4                     # STFT hop 크기 [샘플] (ablation 가능: 2 | 4 | 8)
+    doppler_hz: 50.0           # 유효 도플러 대역 ±Hz (ablation 가능: 30~50)
+
+  sdp:                         # Spatial Doppler Profile (ACF 기반)
+    n_lag: 20                  # ACF 최대 lag [샘플] (ablation 가능: 10~50)
+    wt: 100                    # 내부 윈도우 패킷 수 (ablation 가능: 50~200)
+    hop: 50                    # 내부 윈도우 hop
+    n_windows: 1               # 추출할 윈도우 수 (ablation 가능: 1~5)
+
+  tddfs:                       # Time-Derivative DFS (순간 도플러 속도)
+    delta_t_min: 1             # Δt 탐색 최솟값 [샘플] (ablation 가능)
+    delta_t_max: 10            # Δt 탐색 최댓값 [샘플] (ablation 가능)
+    fc_hz: 5180000000.0        # WiFi 중심 주파수 [Hz]
+
+# ────────────────────────────────────────────────────────────
+#  학습 (Learning — sklearn MLP)
+# ────────────────────────────────────────────────────────────
+learning:
+  hidden: [256, 128, 64]       # 은닉층 구조 (ablation 가능)
+  activation: "relu"           # 활성화 함수: relu | tanh | logistic (ablation 가능)
+  epochs: 300                  # 최대 반복 횟수 (ablation 가능)
+  lr: 0.001                    # 초기 학습률 (ablation 가능)
+  dfs_n_pca: 32                # DFS 전용 PCA 주성분 수
