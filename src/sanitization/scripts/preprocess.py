@@ -258,6 +258,8 @@ def process_single_csv(
     hampel_threshold,
     lowpass_enabled,
     lowpass_cutoff,
+    window_sec=0,
+    hop_sec=0,
 ):
     basename = os.path.basename(file_path)
     ts_preprocessor = TimeSeriesPreprocessor(
@@ -283,8 +285,35 @@ def process_single_csv(
         prep_t, prep_csi, gap_stats = ts_preprocessor.selective_interpolate(timestamps, csi_raw_complex)
 
         # Save Preprocessed (.npz)
-        prep_path = os.path.join(out_dir, basename.replace('.csv', '.npz'))
-        np.savez(prep_path, time=prep_t, csi=prep_csi)
+        if window_sec > 0:
+            # --- SLIDING WINDOW ---
+            fs = target_fs
+            window_samples = int(round(window_sec * fs))
+            hop_samples    = int(round(hop_sec * fs))
+            
+            N = prep_csi.shape[0]
+            stem = basename.replace('.csv', '')
+            # label/subject parsing logic (consistent with windowing.py)
+            parts = stem.split("_")
+            label = parts[-1]
+            base = "_".join(parts[:-1])
+
+            if N < window_samples:
+                pad = window_samples - N
+                csi_pad = np.vstack([prep_csi, np.zeros((pad, prep_csi.shape[1]), dtype=prep_csi.dtype)])
+                dt = (prep_t[-1] - prep_t[0]) / max(N-1, 1) if N > 1 else 1.0/fs
+                time_pad = np.append(prep_t, prep_t[-1] + dt * np.arange(1, pad + 1))
+                prep_path = os.path.join(out_dir, f"{base}_w00_{label}.npz")
+                np.savez(prep_path, time=time_pad, csi=csi_pad)
+            else:
+                starts = list(range(0, N - window_samples + 1, hop_samples))
+                if not starts: starts = [0]
+                for i, s in enumerate(starts):
+                    w_path = os.path.join(out_dir, f"{base}_w{i:02d}_{label}.npz")
+                    np.savez(w_path, time=prep_t[s : s + window_samples], csi=prep_csi[s : s + window_samples])
+        else:
+            prep_path = os.path.join(out_dir, basename.replace('.csv', '.npz'))
+            np.savez(prep_path, time=prep_t, csi=prep_csi)
 
         return basename, True, "Success", gap_stats
     except Exception as e:
@@ -303,6 +332,8 @@ async def run_preprocessing(
     hampel_threshold=HAMPEL_THRESHOLD,
     lowpass_enabled=LOWPASS_ENABLED,
     lowpass_cutoff=LOWPASS_CUTOFF,
+    window_sec=0,
+    hop_sec=0,
     run_id=None,
 ):
     if run_id is None:
@@ -339,6 +370,8 @@ async def run_preprocessing(
             hampel_threshold=hampel_threshold,
             lowpass_enabled=lowpass_enabled,
             lowpass_cutoff=lowpass_cutoff,
+            window_sec=window_sec,
+            hop_sec=hop_sec,
         )
         futures = [loop.run_in_executor(pool, func, fp) for fp in all_files]
 

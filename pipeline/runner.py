@@ -10,6 +10,7 @@ import sys
 import json
 import asyncio
 import types
+from datetime import datetime
 
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 
@@ -22,32 +23,63 @@ def get_dirs(cfg: dict) -> dict:
     date_tag = cfg["experiment"].get("date_tag", "")
     exp_name = cfg["experiment"]["name"]
     method   = cfg["feature_extraction"]["method"]
+    steps    = cfg["experiment"].get("steps", ["extract", "train"])
+
+    sweep_name = cfg["experiment"].get("_sweep_name")
+    sweep_ts   = cfg["experiment"].get("_sweep_ts")
+
+    # Baseline sanitization 경로 (참조/재사용)
+    baseline_sanit = os.path.join(BASE_DIR, "data", "sanitization", "sanitization", date_tag)
+
+    # sanitize step 없으면 baseline sanitization 재사용
+    sanit_is_reused = "sanitize" not in steps
 
     sw = cfg.get("sliding_window", {})
-    if sw.get("enabled", False):
-        win_tag = f"w{sw['window_sec']}s_h{sw['hop_sec']}s"
+
+    if sweep_name and sweep_ts:
+        # ── Ablation mode
+        abl_root  = os.path.join(BASE_DIR, "data", "ablation", f"{sweep_ts}_{sweep_name}", exp_name)
+        res_root  = os.path.join(BASE_DIR, "results", f"{sweep_ts}_{sweep_name}")
+
+        sanit     = baseline_sanit if sanit_is_reused else os.path.join(abl_root, "sanitization")
+        feat      = os.path.join(abl_root, "feature_extraction")
+        res_learn = os.path.join(res_root, "learning", exp_name)
+        res_feat  = os.path.join(res_root, "feature_extraction", exp_name)
+        models    = os.path.join(res_root, "learning", exp_name, "models")
+
+    elif exp_name == "baseline":
+        # ── Baseline single run mode
+        sanit     = baseline_sanit
+        feat      = os.path.join(BASE_DIR, "data", "feature_extraction", method, "baseline")
+        res_root  = os.path.join(BASE_DIR, "results", "baseline")
+        res_learn = os.path.join(res_root, "learning")
+        res_feat  = os.path.join(res_root, "feature_extraction")
+        models    = os.path.join(res_root, "learning", "models")
+
     else:
-        win_tag = None
+        # ── Other single run mode
+        sanit     = baseline_sanit if sanit_is_reused else os.path.join(BASE_DIR, "data", "sanitization", "sanitization", date_tag)
+        feat      = os.path.join(BASE_DIR, "data", "feature_extraction", method, exp_name)
+        res_root  = os.path.join(BASE_DIR, "results", exp_name)
+        res_learn = os.path.join(res_root, "learning")
+        res_feat  = os.path.join(res_root, "feature_extraction")
+        models    = os.path.join(res_root, "learning", "models")
 
     dirs = {
         "raw":      os.path.join(BASE_DIR, "data", "raw", date_tag),
         "prep":     os.path.join(BASE_DIR, "data", "sanitization", "preprocessed", date_tag),
-        "sanit":    os.path.join(BASE_DIR, "data", "sanitization", "sanitization", date_tag),
-        "json":     os.path.join(BASE_DIR, "sanitization", "result", "json"),
-        "plots":    os.path.join(BASE_DIR, "sanitization", "result", "plots"),
+        "sanit":    sanit,
+        "json":     os.path.join(BASE_DIR, "data", "result", "sanitization", "json"),
+        "plots":    os.path.join(BASE_DIR, "data", "result", "sanitization", "plots"),
         "log_win":  os.path.join(BASE_DIR, "data", "result", "windowing"),
-        "feat":     os.path.join(BASE_DIR, "data", "feature_extraction", method, exp_name),
-        "log_feat": os.path.join(BASE_DIR, "data", "result", "feature_extraction", method),
-        "results":  os.path.join(BASE_DIR, "results", exp_name),
-        "models":   os.path.join(BASE_DIR, "results", exp_name, "models"),
+        "feat":     feat,
+        "res_feat": res_feat,
+        "res_learn": res_learn,
+        "models":   models,
     }
 
-    # 슬라이딩 윈도우 활성화 시: feature extraction 입력을 windowed 폴더로
-    if win_tag:
-        dirs["windowed"]   = os.path.join(BASE_DIR, "data", "windowed", exp_name)
-        dirs["feat_input"] = dirs["windowed"]
-    else:
-        dirs["feat_input"] = dirs["sanit"]
+    # 슬라이딩 윈도우 활성화 시: 모든 단계(prep, sanit)가 이미 윈도우 단위임
+    dirs["feat_input"] = dirs["sanit"]
 
     return dirs
 
@@ -59,7 +91,7 @@ def get_dirs(cfg: dict) -> dict:
 async def _step_preprocess(cfg: dict, dirs: dict) -> None:
     pcfg = cfg.get("preprocessing", {})
 
-    _add_path(os.path.join(BASE_DIR, "sanitization", "scripts"))
+    _add_path(os.path.join(BASE_DIR, "src", "sanitization", "scripts"))
     import preprocess
 
     await preprocess.run_preprocessing(
@@ -73,6 +105,8 @@ async def _step_preprocess(cfg: dict, dirs: dict) -> None:
         hampel_threshold  = pcfg.get("hampel_threshold",   5.0),
         lowpass_enabled   = pcfg.get("lowpass_enabled",    False),
         lowpass_cutoff    = pcfg.get("lowpass_cutoff",     11.0),
+        window_sec        = cfg.get("sliding_window", {}).get("window_sec", 0) if cfg.get("sliding_window", {}).get("enabled", False) else 0,
+        hop_sec           = cfg.get("sliding_window", {}).get("hop_sec", 0) if cfg.get("sliding_window", {}).get("enabled", False) else 0,
         run_id            = cfg["experiment"].get("run_id"),
     )
 
@@ -84,7 +118,7 @@ async def _step_preprocess(cfg: dict, dirs: dict) -> None:
 async def _step_sanitize(cfg: dict, dirs: dict) -> None:
     scfg = cfg.get("sanitization", {})
 
-    _add_path(os.path.join(BASE_DIR, "sanitization", "scripts"))
+    _add_path(os.path.join(BASE_DIR, "src", "sanitization", "scripts"))
 
     # template 생성 (캘리브레이션 CSV 있을 때)
     if scfg.get("make_template", False):
@@ -92,7 +126,7 @@ async def _step_sanitize(cfg: dict, dirs: dict) -> None:
         import numpy as np
         calib_dir    = os.path.join(BASE_DIR, scfg.get("calib_dir", "calibration"))
         template_out = os.path.join(BASE_DIR, scfg.get("template_csv",
-                                    "sanitization/template/template.csv"))
+                                    "src/sanitization/template/template.csv"))
         if os.path.isdir(calib_dir):
             make_template.run_make_template(
                 calib_dir       = calib_dir,
@@ -106,7 +140,7 @@ async def _step_sanitize(cfg: dict, dirs: dict) -> None:
 
     import sanitization as san_mod
     template_csv = os.path.join(BASE_DIR, scfg.get("template_csv",
-                                "sanitization/template/template.csv"))
+                                "src/sanitization/template/template.csv"))
 
     await san_mod.run_sanitization(
         prep_dir     = dirs["prep"],
@@ -147,39 +181,39 @@ def _step_extract(cfg: dict, dirs: dict) -> None:
     mcfg   = cfg["feature_extraction"].get(method, {})
 
     os.makedirs(dirs["feat"],     exist_ok=True)
-    os.makedirs(dirs["log_feat"], exist_ok=True)
+    os.makedirs(dirs["res_feat"], exist_ok=True)
 
     if method == "dwt":
-        _add_path(os.path.join(BASE_DIR, "feature_extraction", "dwt"))
+        _add_path(os.path.join(BASE_DIR, "src", "feature_extraction", "dwt"))
         import extract_dwt
         extract_dwt.run_dwt_extraction(
             sanit_dir = dirs["feat_input"],
             out_dir   = dirs["feat"],
-            log_dir   = dirs["log_feat"],
+            log_dir   = dirs["res_feat"],
             wavelet   = mcfg.get("wavelet", "sym3"),
             level     = mcfg.get("level",   10),
             n_pca     = mcfg.get("n_pca",   6),
         )
 
     elif method == "dfs":
-        _add_path(os.path.join(BASE_DIR, "feature_extraction", "dfs"))
+        _add_path(os.path.join(BASE_DIR, "src", "feature_extraction", "dfs"))
         import extract_dfs
         extract_dfs.run_dfs_extraction(
             sanit_dir  = dirs["feat_input"],
             out_dir    = dirs["feat"],
-            log_dir    = dirs["log_feat"],
+            log_dir    = dirs["res_feat"],
             n_fft      = mcfg.get("n_fft",      64),
             hop        = mcfg.get("hop",          4),
             doppler_hz = mcfg.get("doppler_hz", 50.0),
         )
 
     elif method == "sdp":
-        _add_path(os.path.join(BASE_DIR, "feature_extraction", "sdp"))
+        _add_path(os.path.join(BASE_DIR, "src", "feature_extraction", "sdp"))
         import extract_sdp
         extract_sdp.run_sdp_extraction(
             sanit_dir = dirs["feat_input"],
             out_dir   = dirs["feat"],
-            log_dir   = dirs["log_feat"],
+            log_dir   = dirs["res_feat"],
             n_lag     = mcfg.get("n_lag",     20),
             wt        = mcfg.get("wt",       100),
             hop       = mcfg.get("hop",       50),
@@ -187,12 +221,12 @@ def _step_extract(cfg: dict, dirs: dict) -> None:
         )
 
     elif method == "tddfs":
-        _add_path(os.path.join(BASE_DIR, "feature_extraction", "td-dfs"))
+        _add_path(os.path.join(BASE_DIR, "src", "feature_extraction", "td-dfs"))
         import extract_tddfs
         extract_tddfs.run_tddfs_extraction(
             sanit_dir   = dirs["feat_input"],
             out_dir     = dirs["feat"],
-            log_dir     = dirs["log_feat"],
+            log_dir     = dirs["res_feat"],
             delta_t_min = mcfg.get("delta_t_min", 1),
             delta_t_max = mcfg.get("delta_t_max", 10),
             fc_hz       = mcfg.get("fc_hz",       5.18e9),
@@ -211,10 +245,10 @@ def _step_train(cfg: dict, dirs: dict) -> dict:
     lcfg   = cfg.get("learning", {})
     mcfg   = cfg["feature_extraction"].get(method, {})
 
-    os.makedirs(dirs["models"],  exist_ok=True)
-    os.makedirs(dirs["results"], exist_ok=True)
+    os.makedirs(dirs["models"],    exist_ok=True)
+    os.makedirs(dirs["res_learn"], exist_ok=True)
 
-    _add_path(os.path.join(BASE_DIR, "learning", "mlp"))
+    _add_path(os.path.join(BASE_DIR, "src", "learning", "mlp"))
 
     # 공통 args namespace
     args = types.SimpleNamespace(
@@ -225,7 +259,7 @@ def _step_train(cfg: dict, dirs: dict) -> dict:
         epochs     = lcfg.get("epochs",      300),
         lr         = lcfg.get("lr",          1e-3),
         model_dir  = dirs["models"],
-        result_dir = dirs["results"],
+        result_dir = dirs["res_learn"],
         inference  = False,
         model_path = None,
         infer_file = None,
@@ -313,25 +347,20 @@ def run_pipeline(cfg: dict) -> dict:
     metrics = {}
 
     if "preprocess" in steps:
-        print("── [Step 1] Preprocessing ─────────────────────────────")
+        print("-- [Step 1] Preprocessing -----------------------------")
         asyncio.run(_step_preprocess(cfg, dirs))
 
     if "sanitize" in steps:
-        print("── [Step 2] Sanitization ──────────────────────────────")
+        print("-- [Step 2] Sanitization ------------------------------")
         asyncio.run(_step_sanitize(cfg, dirs))
 
-    # 슬라이딩 윈도우: 'window' 스텝이 명시되었거나, extract 직전에 자동 실행
-    needs_window = sw.get("enabled", False)
-    if needs_window and ("window" in steps or "extract" in steps):
-        print("── [Step W] Sliding Window ────────────────────────────")
-        _step_window(cfg, dirs)
 
     if "extract" in steps:
-        print("── [Step 3] Feature Extraction ────────────────────────")
+        print("-- [Step 3] Feature Extraction ------------------------")
         _step_extract(cfg, dirs)
 
     if "train" in steps:
-        print("── [Step 4] Training & Evaluation ─────────────────────")
+        print("-- [Step 4] Training & Evaluation ---------------------")
         metrics = _step_train(cfg, dirs)
 
     return metrics

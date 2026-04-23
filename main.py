@@ -37,6 +37,7 @@ sliding_window.enabled=true 이면 sanitize 출력 → windowing → feature ext
 import argparse
 import copy
 import os
+from datetime import datetime
 
 from pipeline.config import load_config, set_nested, parse_value, validate_config
 from pipeline.runner import run_pipeline
@@ -94,7 +95,7 @@ def build_parser() -> argparse.ArgumentParser:
         help="실행할 스텝만 지정 (preprocess sanitize window extract train)",
     )
     p.add_argument(
-        "--set", nargs="*",
+        "--set", action="append",
         metavar="KEY=VALUE",
         dest="overrides",
         help="dot-path 파라미터 오버라이드 (예: --set feature_extraction.dwt.level=8)",
@@ -158,9 +159,10 @@ def run_ablation(ablation_path: str) -> None:
         print("[Ablation] sweep 정의가 없습니다.")
         return
 
-    # sweep 이름: ablation yaml 파일명 기반
+    # sweep 이름: ablation yaml 파일명 기반 + timestamp
     sweep_name = os.path.splitext(os.path.basename(ablation_path))[0]
-    result_dir = os.path.join(BASE_DIR, "results", "ablation", sweep_name)
+    sweep_ts   = datetime.now().strftime("%Y%m%d_%H%M%S")
+    result_dir = os.path.join(BASE_DIR, "results", f"{sweep_ts}_{sweep_name}")
     os.makedirs(result_dir, exist_ok=True)
     summary_path = os.path.join(result_dir, "ablation_summary.csv")
 
@@ -168,11 +170,12 @@ def run_ablation(ablation_path: str) -> None:
     all_experiments = _expand_sweep(sweep_list, base_cfg)
     total = len(all_experiments)
 
-    print(f"\n{'═'*60}")
+    print(f"\n{'='*60}")
     print(f"  Ablation Sweep: {sweep_name}")
+    print(f"  Timestamp     : {sweep_ts}")
     print(f"  총 실험 수    : {total}")
     print(f"  결과 디렉토리 : {result_dir}")
-    print(f"{'═'*60}")
+    print(f"{'='*60}")
 
     records = []
 
@@ -180,6 +183,9 @@ def run_ablation(ablation_path: str) -> None:
         val_str  = _value_to_str(param_value)
         exp_name = f"{param_name.split('.')[-1]}_{val_str}"
         exp_cfg["experiment"]["name"] = exp_name
+        # sweep context 주입
+        exp_cfg["experiment"]["_sweep_name"] = sweep_name
+        exp_cfg["experiment"]["_sweep_ts"]   = sweep_ts
 
         print(f"\n[{i}/{total}] {param_name} = {param_value}")
 
@@ -208,8 +214,8 @@ def run_ablation(ablation_path: str) -> None:
         }
         tracker.append_summary(summary_path, record)
 
-        # 실험별 폴더에 config + metrics 저장
-        run_dir = os.path.join(result_dir, exp_name)
+        # 실험별 폴더에 config + metrics 저장 (runner가 경로 설정)
+        run_dir = os.path.join(result_dir, "learning", exp_name)
         tracker.save_run(run_dir, exp_cfg, metrics)
 
         records.append({**record, "test_accuracy": acc, "cv_mean": cv, "cv_std": std})

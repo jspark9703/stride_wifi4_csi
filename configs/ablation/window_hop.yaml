@@ -10,4 +10,4 @@ sweep:
 overrides:
   sliding_window.enabled: true
   sliding_window.window_sec: 1.0
-  experiment.steps: [extract, train]
+  experiment.steps: [preprocess, sanitize, extract, train]

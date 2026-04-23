@@ -10,6 +10,19 @@ experiment:
     - train
 
 # ────────────────────────────────────────────────────────────
+#  슬라이딩 윈도우 (Online Learning 대응)
+#  온라인 추론 시 0.8~1초 단위 윈도우로 실시간 분류를 산정
+# ────────────────────────────────────────────────────────────
+sliding_window:
+  enabled: false               # 슬라이딩 윈도우 활성화 여부 (ablation 가능)
+  window_sec: 1.0              # 윈도우 크기 [초] (0.8 | 0.9 | 1.0 — ablation 가능)
+  hop_sec: 0.5                 # hop 크기 [초] (overlap = 1 - hop/window)
+  # window_sec=1.0 → 100샘플 @ 100Hz  (online 추론 가정: 1초)
+  # window_sec=0.8 → 80샘플  @ 100Hz  (빠른 반응 버전)
+  # hop_sec=0.5   → 50% overlap (데이터 증강 효과)
+  # hop_sec=0.1   → 90% overlap (최대 증강, 느린 추론)
+  
+# ────────────────────────────────────────────────────────────
 #  전처리 (Preprocessing)
 # ────────────────────────────────────────────────────────────
 preprocessing:
@@ -29,25 +42,14 @@ preprocessing:
 sanitization:
   enable_ratio: false          # CSI Ratio 사용 (다중 안테나, ablation 가능)
   make_template: false          # 캘리브레이션 CSV → template 자동 생성
-  template_csv: "sanitization/template/template.csv"
+  template_csv: "src/sanitization/template/template.csv"
   calib_dir: "calibration"
   linear_start: 30             # 선형 부반송파 구간 시작 인덱스 (ablation 가능)
   linear_end: 78               # 종료 인덱스 (exclusive)
   hist_bins: 100               # 시각화용 히스토그램 빈
   hist_range_max: 40           # 히스토그램 X축 최대값 [ms]
 
-# ────────────────────────────────────────────────────────────
-#  슬라이딩 윈도우 (Online Learning 대응)
-#  온라인 추론 시 0.8~1초 단위 윈도우로 실시간 분류를 산정
-# ────────────────────────────────────────────────────────────
-sliding_window:
-  enabled: false               # 슬라이딩 윈도우 활성화 여부 (ablation 가능)
-  window_sec: 1.0              # 윈도우 크기 [초] (0.8 | 0.9 | 1.0 — ablation 가능)
-  hop_sec: 0.5                 # hop 크기 [초] (overlap = 1 - hop/window)
-  # window_sec=1.0 → 100샘플 @ 100Hz  (online 추론 가정: 1초)
-  # window_sec=0.8 → 80샘플  @ 100Hz  (빠른 반응 버전)
-  # hop_sec=0.5   → 50% overlap (데이터 증강 효과)
-  # hop_sec=0.1   → 90% overlap (최대 증강, 느린 추론)
+
 
 # ────────────────────────────────────────────────────────────
 #  특징 추출 (Feature Extraction)
