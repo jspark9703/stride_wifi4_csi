@@ -346,7 +346,10 @@ async def run_preprocessing(
     ensure_dir(out_dir)
     ensure_dir(json_dir)
 
-    all_files = glob.glob(os.path.join(raw_dir, "*.csv"))
+    abs_raw = os.path.abspath(raw_dir)
+    pattern = os.path.join(abs_raw, "**", "*.csv")
+    print(f"[Preprocess] Pattern: {pattern}")
+    all_files = sorted(glob.glob(pattern, recursive=True))
     total_files = len(all_files)
 
     if total_files == 0:

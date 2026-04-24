@@ -12,7 +12,40 @@ import asyncio
 import types
 from datetime import datetime
 
-BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+BASE_DIR     = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+BASELINE_ROOT = os.path.join(BASE_DIR, "data", "ablation", "baseline")
+
+
+# ══════════════════════════════════════════════════════════════
+#  디렉토리 구성 유틸리티
+# ══════════════════════════════════════════════════════════════
+
+def _pick(affected: set, step: str, fresh_path: str, reuse_path: str) -> str:
+    """step이 affected에 포함되면 fresh_path, 아니면 reuse_path(baseline) 반환."""
+    return fresh_path if step in affected else reuse_path
+
+
+def _affected_steps(param: str) -> set:
+    """
+    ablation 파라미터 dot-path의 최상위 섹션으로
+    '새로 실행해야 하는 스텝' 집합을 반환.
+
+    | param prefix        | 새로 실행할 스텝                              |
+    |---------------------|-----------------------------------------------|
+    | preprocessing.*     | preprocess, sanitize, extract, train          |
+    | sanitization.*      | sanitize, extract, train                      |
+    | sliding_window.*    | window, preprocess, sanitize, extract, train  |
+    | feature_extraction.*| extract, train                                |
+    | learning.*          | train                                         |
+    """
+    prefix = param.split(".")[0] if param else ""
+    return {
+        "preprocessing":      {"preprocess", "sanitize", "extract", "train"},
+        "sanitization":       {"sanitize",   "extract",  "train"},
+        "sliding_window":     {"window", "preprocess", "sanitize", "extract", "train"},
+        "feature_extraction": {"extract",    "train"},
+        "learning":           {"train"},
+    }.get(prefix, set())
 
 
 # ══════════════════════════════════════════════════════════════
@@ -20,68 +53,94 @@ BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 # ══════════════════════════════════════════════════════════════
 
 def get_dirs(cfg: dict) -> dict:
-    date_tag = cfg["experiment"].get("date_tag", "")
-    exp_name = cfg["experiment"]["name"]
-    method   = cfg["feature_extraction"]["method"]
-    steps    = cfg["experiment"].get("steps", ["extract", "train"])
+    """
+    실험 모드별 데이터/결과 경로 딕셔너리 반환.
 
-    sweep_name = cfg["experiment"].get("_sweep_name")
-    sweep_ts   = cfg["experiment"].get("_sweep_ts")
+    모드 분기
+    ---------
+    1. baseline 단일 실행  (exp_name == "baseline", sweep 없음)
+       → data/ablation/baseline/{preprocessed,sanitization,windowed,feature_extraction}
+    2. 일반 단일 실행  (그 외 exp_name, sweep 없음)
+       → 기존 분산 구조 유지 (data/sanitization/, data/feature_extraction/)
+    3. Ablation sweep  (_sweep_name, _sweep_ts 존재)
+       → _ablation_param 로 영향 스텝 계산,
+         영향 스텝은 sweep 경로, 나머지는 baseline 재사용
+    """
+    date_tag       = cfg["experiment"].get("date_tag", "")
+    exp_name       = cfg["experiment"]["name"]
+    method         = cfg["feature_extraction"]["method"]
+    sweep_name     = cfg["experiment"].get("_sweep_name")
+    sweep_ts       = cfg["experiment"].get("_sweep_ts")
+    ablation_param = cfg["experiment"].get("_ablation_param", "")
+    sw_enabled     = cfg.get("sliding_window", {}).get("enabled", False)
 
-    # Baseline sanitization 경로 (참조/재사용)
-    baseline_sanit = os.path.join(BASE_DIR, "data", "sanitization", "sanitization", date_tag)
-
-    # sanitize step 없으면 baseline sanitization 재사용
-    sanit_is_reused = "sanitize" not in steps
-
-    sw = cfg.get("sliding_window", {})
-
+    # ── 모드 1: Ablation sweep ─────────────────────────────────
     if sweep_name and sweep_ts:
-        # ── Ablation mode
-        abl_root  = os.path.join(BASE_DIR, "data", "ablation", f"{sweep_ts}_{sweep_name}", exp_name)
+        affected  = _affected_steps(ablation_param)
+        sweep_exp = os.path.join(
+            BASE_DIR, "data", "ablation",
+            f"{sweep_ts}_{sweep_name}", exp_name
+        )
         res_root  = os.path.join(BASE_DIR, "results", f"{sweep_ts}_{sweep_name}")
 
-        sanit     = baseline_sanit if sanit_is_reused else os.path.join(abl_root, "sanitization")
-        feat      = os.path.join(abl_root, "feature_extraction")
+        prep     = _pick(affected, "preprocess",
+                         os.path.join(sweep_exp, "preprocessed"),
+                         os.path.join(BASELINE_ROOT, "preprocessed"))
+        sanit    = _pick(affected, "sanitize",
+                         os.path.join(sweep_exp, "sanitization"),
+                         os.path.join(BASELINE_ROOT, "sanitization"))
+        windowed = _pick(affected, "window",
+                         os.path.join(sweep_exp, "windowed"),
+                         os.path.join(BASELINE_ROOT, "windowed"))
+        feat     = _pick(affected, "extract",
+                         os.path.join(sweep_exp, "feature_extraction"),
+                         os.path.join(BASELINE_ROOT, "feature_extraction", method))
+
         res_learn = os.path.join(res_root, "learning", exp_name)
         res_feat  = os.path.join(res_root, "feature_extraction", exp_name)
         models    = os.path.join(res_root, "learning", exp_name, "models")
 
+    # ── 모드 2: Baseline 단일 실행 ────────────────────────────
     elif exp_name == "baseline":
-        # ── Baseline single run mode
-        sanit     = baseline_sanit
-        feat      = os.path.join(BASE_DIR, "data", "feature_extraction", method, "baseline")
+        prep     = os.path.join(BASELINE_ROOT, "preprocessed")
+        sanit    = os.path.join(BASELINE_ROOT, "sanitization")
+        windowed = os.path.join(BASELINE_ROOT, "windowed")
+        feat     = os.path.join(BASELINE_ROOT, "feature_extraction", method)
+
         res_root  = os.path.join(BASE_DIR, "results", "baseline")
         res_learn = os.path.join(res_root, "learning")
         res_feat  = os.path.join(res_root, "feature_extraction")
         models    = os.path.join(res_root, "learning", "models")
 
+    # ── 모드 3: 일반 단일 실행 (기존 분산 구조) ───────────────
     else:
-        # ── Other single run mode
-        sanit     = baseline_sanit if sanit_is_reused else os.path.join(BASE_DIR, "data", "sanitization", "sanitization", date_tag)
-        feat      = os.path.join(BASE_DIR, "data", "feature_extraction", method, exp_name)
+        prep     = os.path.join(BASE_DIR, "data", "sanitization", "preprocessed", date_tag)
+        sanit    = os.path.join(BASE_DIR, "data", "sanitization", "sanitization", date_tag)
+        windowed = os.path.join(BASE_DIR, "data", "windowed", date_tag)
+        feat     = os.path.join(BASE_DIR, "data", "feature_extraction", method, exp_name)
+
         res_root  = os.path.join(BASE_DIR, "results", exp_name)
         res_learn = os.path.join(res_root, "learning")
         res_feat  = os.path.join(res_root, "feature_extraction")
         models    = os.path.join(res_root, "learning", "models")
 
-    dirs = {
-        "raw":      os.path.join(BASE_DIR, "data", "raw", date_tag),
-        "prep":     os.path.join(BASE_DIR, "data", "sanitization", "preprocessed", date_tag),
-        "sanit":    sanit,
-        "json":     os.path.join(BASE_DIR, "data", "result", "sanitization", "json"),
-        "plots":    os.path.join(BASE_DIR, "data", "result", "sanitization", "plots"),
-        "log_win":  os.path.join(BASE_DIR, "data", "result", "windowing"),
-        "feat":     feat,
-        "res_feat": res_feat,
-        "res_learn": res_learn,
-        "models":   models,
+    # feature extraction 입력은 항상 sanitize 결과
+    # (window → preprocess → sanitize → extract 순서이므로)
+
+    return {
+        "raw":        os.path.join(BASE_DIR, "data", "raw", date_tag),
+        "prep":       prep,
+        "sanit":      sanit,
+        "windowed":   windowed,
+        "feat":       feat,
+        "feat_input": sanit,
+        "json":       os.path.join(BASE_DIR, "data", "logs", "sanitization", "json"),
+        "plots":      os.path.join(BASE_DIR, "data", "logs", "sanitization", "plots"),
+        "log_win":    os.path.join(BASE_DIR, "data", "logs", "windowing"),
+        "res_feat":   res_feat,
+        "res_learn":  res_learn,
+        "models":     models,
     }
-
-    # 슬라이딩 윈도우 활성화 시: 모든 단계(prep, sanit)가 이미 윈도우 단위임
-    dirs["feat_input"] = dirs["sanit"]
-
-    return dirs
 
 
 # ══════════════════════════════════════════════════════════════
@@ -89,25 +148,36 @@ def get_dirs(cfg: dict) -> dict:
 # ══════════════════════════════════════════════════════════════
 
 async def _step_preprocess(cfg: dict, dirs: dict) -> None:
-    pcfg = cfg.get("preprocessing", {})
+    """
+    [Step 1] Preprocessing: CSV → preprocessed NPZ.
+
+    sliding_window.enabled=True  → windowed CSV (dirs["windowed"]) 를 입력으로 사용.
+    sliding_window.enabled=False → raw CSV (dirs["raw"]) 를 입력으로 사용.
+    windowing 자체는 window 스텝에서 완료되므로 window_sec=0.
+    """
+    pcfg       = cfg.get("preprocessing", {})
+    sw_enabled = cfg.get("sliding_window", {}).get("enabled", False)
 
     _add_path(os.path.join(BASE_DIR, "src", "sanitization", "scripts"))
     import preprocess
 
+    # windowing 이 완료된 CSV 또는 raw CSV 를 입력으로
+    input_dir = dirs["windowed"] if sw_enabled else dirs["raw"]
+
     await preprocess.run_preprocessing(
-        raw_dir           = dirs["raw"],
-        out_dir           = dirs["prep"],
-        json_dir          = dirs["json"],
-        target_fs         = pcfg.get("target_fs",         100),
-        max_gap_ms        = pcfg.get("max_gap_ms",         20.0),
-        hampel_enabled    = pcfg.get("hampel_enabled",     True),
-        hampel_window     = pcfg.get("hampel_window",      7),
-        hampel_threshold  = pcfg.get("hampel_threshold",   5.0),
-        lowpass_enabled   = pcfg.get("lowpass_enabled",    False),
-        lowpass_cutoff    = pcfg.get("lowpass_cutoff",     11.0),
-        window_sec        = cfg.get("sliding_window", {}).get("window_sec", 0) if cfg.get("sliding_window", {}).get("enabled", False) else 0,
-        hop_sec           = cfg.get("sliding_window", {}).get("hop_sec", 0) if cfg.get("sliding_window", {}).get("enabled", False) else 0,
-        run_id            = cfg["experiment"].get("run_id"),
+        raw_dir          = input_dir,
+        out_dir          = dirs["prep"],
+        json_dir         = dirs["json"],
+        target_fs        = pcfg.get("target_fs",        100),
+        max_gap_ms       = pcfg.get("max_gap_ms",        20.0),
+        hampel_enabled   = pcfg.get("hampel_enabled",   True),
+        hampel_window    = pcfg.get("hampel_window",    7),
+        hampel_threshold = pcfg.get("hampel_threshold", 5.0),
+        lowpass_enabled  = pcfg.get("lowpass_enabled",  False),
+        lowpass_cutoff   = pcfg.get("lowpass_cutoff",   11.0),
+        window_sec       = 0,   # windowing 은 window 스텝에서 완료
+        hop_sec          = 0,
+        run_id           = cfg["experiment"].get("run_id"),
     )
 
 
@@ -157,17 +227,20 @@ async def _step_sanitize(cfg: dict, dirs: dict) -> None:
 # ══════════════════════════════════════════════════════════════
 
 def _step_window(cfg: dict, dirs: dict) -> None:
-    from pipeline.windowing import apply_sliding_window
+    """
+    [Step W] Window: raw CSV → windowed CSV.
+    파이프라인에서 preprocess 스텝 바로 앞에 자동 실행됨.
+    raw/ 의 CSV 파일들을 시간 기반 슬라이딩 윈도우로 분할 → windowed/ 에 저장.
+    """
+    from pipeline.windowing import apply_sliding_window_csv
 
-    sw  = cfg["sliding_window"]
-    fs  = cfg.get("preprocessing", {}).get("target_fs", 100)
+    sw = cfg["sliding_window"]
 
-    apply_sliding_window(
-        sanit_dir  = dirs["sanit"],
+    apply_sliding_window_csv(
+        raw_dir    = dirs["raw"],
         out_dir    = dirs["windowed"],
-        window_sec = sw.get("window_sec", 1.0),
+        window_sec = sw.get("window_sec", 2.5),
         hop_sec    = sw.get("hop_sec",    0.5),
-        fs         = fs,
         log_dir    = dirs["log_win"],
     )
 
@@ -326,18 +399,27 @@ def run_pipeline(cfg: dict) -> dict:
     """
     YAML cfg에 따라 전체 파이프라인 실행.
 
+    파이프라인 순서
+    --------------
+    raw/ → [window] → windowed/ → [preprocess] → preprocessed/
+         → [sanitize] → sanitization/ → [extract] → [train]
+
+    window 스텝은 sliding_window.enabled=True 이고 steps에 preprocess 가 포함될 때
+    자동으로 preprocess 전에 삽입됨.
+
     Returns
     -------
     metrics : dict  (test_accuracy, cv_mean, cv_std, ...)
     """
     dirs  = get_dirs(cfg)
     steps = cfg["experiment"].get("steps", ["extract", "train"])
+    sw    = cfg.get("sliding_window", {})
+    sw_enabled = sw.get("enabled", False)
 
     print(f"\n{'='*60}")
     print(f"  실험명 : {cfg['experiment']['name']}")
     print(f"  방법   : {cfg['feature_extraction']['method']}")
-    sw = cfg.get("sliding_window", {})
-    if sw.get("enabled", False):
+    if sw_enabled:
         print(f"  윈도우 : {sw['window_sec']}s  hop={sw['hop_sec']}s")
     else:
         print(f"  윈도우 : 비활성화 (전체 신호)")
@@ -346,19 +428,28 @@ def run_pipeline(cfg: dict) -> dict:
 
     metrics = {}
 
+    # ── [Step W] Window (raw CSV → windowed CSV) ────────────────
+    # sliding_window 활성화 + preprocess 스텝 포함 시 자동 삽입
+    if sw_enabled and "preprocess" in steps:
+        print("-- [Step W] Window Segmentation (CSV) -----------------")
+        _step_window(cfg, dirs)
+
+    # ── [Step 1] Preprocess (windowed or raw CSV → NPZ) ─────────
     if "preprocess" in steps:
         print("-- [Step 1] Preprocessing -----------------------------")
         asyncio.run(_step_preprocess(cfg, dirs))
 
+    # ── [Step 2] Sanitize (preprocessed NPZ → sanitized NPZ) ────
     if "sanitize" in steps:
         print("-- [Step 2] Sanitization ------------------------------")
         asyncio.run(_step_sanitize(cfg, dirs))
 
-
+    # ── [Step 3] Extract (sanitized NPZ → features) ─────────────
     if "extract" in steps:
         print("-- [Step 3] Feature Extraction ------------------------")
         _step_extract(cfg, dirs)
 
+    # ── [Step 4] Train ───────────────────────────────────────────
     if "train" in steps:
         print("-- [Step 4] Training & Evaluation ---------------------")
         metrics = _step_train(cfg, dirs)

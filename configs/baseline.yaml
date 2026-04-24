@@ -1,0 +1,53 @@
+# Baseline V2: Optimized Sliding Window Configuration
+# Experimental Baseline for 2.5s window logic
+experiment:
+  name: "baseline"
+  date_tag: ""                 # Full dataset discovery enabled
+  steps:
+    - preprocess
+    - sanitize
+    - extract
+    - train
+
+sliding_window:
+  enabled: true
+  window_sec: 2.5
+  hop_sec: 0.5
+# ────────────────────────────────────────────────────────────
+#  전처리 (Preprocessing)
+# ────────────────────────────────────────────────────────────
+preprocessing:
+  target_fs: 100               # 목표 샘플링 주파수 [Hz]
+  max_gap_ms: 20.0             # 보간 기준 최대 갭 [ms]
+
+  hampel_enabled: false         # Hampel 이상치 필터 (ablation 가능)
+  hampel_window: 7             # 필터 윈도우 크기 (홀수, 3~11)
+  hampel_threshold: 5.0        # 이상치 임계값 (1.0~10.0)
+
+  lowpass_enabled: false       # Butterworth 저역통과 필터 (ablation 가능)
+  lowpass_cutoff: 11.0         # 차단 주파수 [Hz] (5.0~20.0)
+# ────────────────────────────────────────────────────────────
+#  위상/진폭 보정 (Sanitization)
+# ────────────────────────────────────────────────────────────
+sanitization:
+  enable_ratio: false          # CSI Ratio 사용 (다중 안테나, ablation 가능)
+  make_template: false          # 캘리브레이션 CSV → template 자동 생성
+  template_csv: "src/sanitization/template/template.csv"
+  calib_dir: "calibration"
+  linear_start: 30             # 선형 부반송파 구간 시작 인덱스 (ablation 가능)
+  linear_end: 78               # 종료 인덱스 (exclusive)
+  hist_bins: 100               # 시각화용 히스토그램 빈
+  hist_range_max: 40           # 히스토그램 X축 최대값 [ms]
+
+feature_extraction:
+  method: "dwt"
+  dwt:
+    wavelet: "sym3"
+    level: 10
+    n_pca: 6
+
+learning:
+  hidden: [256, 128, 64]
+  activation: "relu"
+  epochs: 300
+  lr: 0.001

@@ -235,7 +235,7 @@ def run_sdp_extraction(
     log_subdir = os.path.join(log_dir, run_id.split("_")[0])
     ensure_dir(log_subdir)
 
-    all_files = sorted(glob.glob(os.path.join(sanit_dir, "*.npz")))
+    all_files = sorted(glob.glob(os.path.join(sanit_dir, "**", "*.npz"), recursive=True))
     total = len(all_files)
     if total == 0:
         print(f"[SDP] No NPZ files found in {sanit_dir}")

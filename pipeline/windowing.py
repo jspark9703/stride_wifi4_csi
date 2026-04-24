@@ -1,25 +1,30 @@
 """
 pipeline/windowing.py
 ======================
-온라인 학습 대응 슬라이딩 윈도우 전처리 모듈.
+슬라이딩 윈도우 모듈 — raw CSV 기반 (Pipeline 첫 번째 스텝).
 
-Sanitized NPZ (전체 보행 신호) → 고정 길이 윈도우 단위 NPZ 파일들.
-각 윈도우는 독립 샘플로 저장되어 기존 feature extraction 모듈과 호환.
+파이프라인 순서
+--------------
+  raw/          → [window]     → windowed/        (CSV)
+  windowed/     → [preprocess] → preprocessed/    (NPZ)
+  preprocessed/ → [sanitize]   → sanitization/    (NPZ)
+  sanitization/ → [extract]    → feature_extraction/
+  feature_extraction/ → [train] → models/
+
+window 스텝 역할
+----------------
+- raw CSV 파일을 시간(초) 기준으로 슬라이딩 윈도우 분할
+- 각 윈도우를 독립 CSV 파일로 저장
+- preprocess 스텝이 windowed CSV를 읽어 NPZ로 변환
 
 윈도우 파일 네이밍 규칙:
-  원본: csi_260406_011319_minhyeok_big.npz
-  윈도우: csi_260406_011319_minhyeok_w00_big.npz
-           → parts[-1] = 'big' (기존 _parse_label_subject 호환)
+  원본  : csi_260331_011319_minhyeok_big.csv
+  윈도우: csi_260331_011319_minhyeok_w00_big.csv
+           → label은 마지막 '_' 다음 (기존 _parse_label_subject 호환)
 
 파라미터:
-  window_sec : 윈도우 크기 [초] — 0.8 | 0.9 | 1.0
+  window_sec : 윈도우 크기 [초] — 예) 2.5
   hop_sec    : hop 크기 [초]    — overlap = 1 - hop / window
-  fs         : 샘플링 주파수 [Hz] (전처리 target_fs 와 동일)
-
-online 추론 가정:
-  window_sec=1.0 → 100샘플 → 1초마다 보폭 분류 1회
-  window_sec=0.8 → 80샘플  → 0.8초마다 분류 (빠른 반응)
-  hop_sec=0.1    → 90% overlap → 최대 데이터 증강
 """
 
 import os
@@ -29,7 +34,12 @@ import time
 from datetime import datetime
 
 import numpy as np
+import pandas as pd
 
+
+# ══════════════════════════════════════════════════════════════
+#  공통 유틸리티
+# ══════════════════════════════════════════════════════════════
 
 def _split_stem(stem: str):
     """
@@ -48,6 +58,134 @@ def _split_stem(stem: str):
     return base, label
 
 
+# ══════════════════════════════════════════════════════════════
+#  CSV 기반 슬라이딩 윈도우 (MAIN — raw → windowed CSV)
+# ══════════════════════════════════════════════════════════════
+
+def apply_sliding_window_csv(
+    raw_dir:    str,
+    out_dir:    str,
+    window_sec: float = 2.5,
+    hop_sec:    float = 0.5,
+    log_dir:    str   = None,
+) -> str:
+    """
+    raw_dir 내 모든 raw CSV를 시간 기반 슬라이딩 윈도우로 분할하고
+    windowed CSV 파일로 저장. (preprocess 스텝 입력 호환)
+
+    Parameters
+    ----------
+    raw_dir    : 원본 CSV 디렉토리 (하위 폴더 포함 재귀 탐색)
+    out_dir    : windowed CSV 저장 디렉토리
+    window_sec : 윈도우 크기 [초]
+    hop_sec    : hop 크기 [초]
+    log_dir    : JSON 로그 저장 디렉토리 (None 이면 저장 안 함)
+
+    Returns
+    -------
+    out_dir : 결과 디렉토리 경로
+    """
+    os.makedirs(out_dir, exist_ok=True)
+
+    # raw CSV 파일 탐색 (재귀 포함)
+    all_files = sorted(glob.glob(os.path.join(raw_dir, "**", "*.csv"), recursive=True))
+    if not all_files:
+        all_files = sorted(glob.glob(os.path.join(raw_dir, "*.csv")))
+
+    if not all_files:
+        print(f"[Window] No CSV files found in {raw_dir}")
+        return out_dir
+
+    print(
+        f"[Window] CSV mode  window={window_sec}s  hop={hop_sec}s  "
+        f"overlap={1 - hop_sec/window_sec:.0%}  files={len(all_files)}"
+    )
+
+    t0            = time.time()
+    total_windows = 0
+    success       = 0
+    failed        = []
+
+    for fp in all_files:
+        try:
+            df   = pd.read_csv(fp)
+            stem = os.path.splitext(os.path.basename(fp))[0]
+            base, label = _split_stem(stem)
+
+            if "timestamp" not in df.columns:
+                failed.append({"file": os.path.basename(fp), "error": "no timestamp column"})
+                continue
+
+            # 시작 시점 기준 경과 시간(초) 계산
+            ts    = pd.to_datetime(df["timestamp"], format="ISO8601")
+            t_rel = (ts - ts.iloc[0]).dt.total_seconds().values
+            T     = t_rel[-1]   # 전체 지속 시간 [초]
+
+            windows = []
+            start_t = 0.0
+            w_idx   = 0
+
+            while start_t + window_sec <= T + 1e-6:
+                end_t = start_t + window_sec
+                mask  = (t_rel >= start_t - 1e-9) & (t_rel < end_t - 1e-9)
+                if mask.sum() > 0:
+                    windows.append((w_idx, df[mask].copy()))
+                start_t += hop_sec
+                w_idx   += 1
+
+            # 신호가 window_sec보다 짧으면 전체를 단일 윈도우로 처리
+            if not windows:
+                windows = [(0, df.copy())]
+
+            for i, w_df in windows:
+                out_name = f"{base}_w{i:02d}_{label}.csv"
+                w_df.to_csv(os.path.join(out_dir, out_name), index=False)
+
+            total_windows += len(windows)
+            success       += 1
+
+        except Exception as e:
+            failed.append({"file": os.path.basename(fp), "error": str(e)})
+            print(f"  [FAIL] {os.path.basename(fp)}: {e}")
+
+    elapsed = time.time() - t0
+    print(
+        f"[Window] Done → {total_windows} windowed CSV from {success} files  "
+        f"({elapsed:.1f}s)  → {out_dir}"
+    )
+
+    if log_dir:
+        os.makedirs(log_dir, exist_ok=True)
+        run_id  = datetime.now().strftime("%Y%m%d_%H%M%S")
+        payload = {
+            "timestamp": datetime.now().isoformat(),
+            "mode": "csv",
+            "params": {
+                "window_sec":    window_sec,
+                "hop_sec":       hop_sec,
+                "overlap_ratio": round(1 - hop_sec / window_sec, 4),
+            },
+            "summary": {
+                "input_files":   len(all_files),
+                "success":       success,
+                "failed":        len(failed),
+                "total_windows": total_windows,
+                "elapsed_sec":   round(elapsed, 2),
+            },
+            "failures": failed,
+        }
+        log_path = os.path.join(log_dir, f"{run_id}_windowing_log.json")
+        with open(log_path, "w", encoding="utf-8") as f:
+            json.dump(payload, f, indent=4, ensure_ascii=False)
+        print(f"[Window] Log → {log_path}")
+
+    return out_dir
+
+
+# ══════════════════════════════════════════════════════════════
+#  NPZ 기반 슬라이딩 윈도우 (Legacy — sanitized NPZ 분할)
+# ══════════════════════════════════════════════════════════════
+
 def segment_single(
     npz_path: str,
     window_samples: int,
@@ -64,16 +202,16 @@ def segment_single(
     time_arr = data["time"].astype(np.float64)   # (N,)
     csi_arr  = data["csi"]                        # (N, 108) complex
 
-    N = csi_arr.shape[0]
+    N    = csi_arr.shape[0]
     stem = os.path.splitext(os.path.basename(npz_path))[0]
     base, label = _split_stem(stem)
 
     windows = []
 
     if N < window_samples:
-        # 신호가 윈도우보다 짧으면 zero-pad 후 단일 윈도우로 처리
+        # 신호가 윈도우보다 짧으면 zero-pad 후 단일 윈도우
         pad = window_samples - N
-        csi_pad  = np.vstack([
+        csi_pad = np.vstack([
             csi_arr,
             np.zeros((pad, csi_arr.shape[1]), dtype=csi_arr.dtype),
         ])
@@ -104,28 +242,16 @@ def segment_single(
 
 
 def apply_sliding_window(
-    sanit_dir: str,
-    out_dir: str,
+    sanit_dir:  str,
+    out_dir:    str,
     window_sec: float = 1.0,
-    hop_sec: float    = 0.5,
-    fs: int           = 100,
-    log_dir: str      = None,
+    hop_sec:    float = 0.5,
+    fs:         int   = 100,
+    log_dir:    str   = None,
 ) -> str:
     """
-    sanit_dir 내 모든 NPZ를 슬라이딩 윈도우로 분할하여 out_dir에 저장.
-
-    Parameters
-    ----------
-    sanit_dir    : sanitized NPZ 입력 디렉토리
-    out_dir      : 윈도우 NPZ 출력 디렉토리
-    window_sec   : 윈도우 크기 [초] (0.8 | 0.9 | 1.0)
-    hop_sec      : hop 크기 [초]
-    fs           : 샘플링 주파수 (default 100 Hz)
-    log_dir      : JSON 로그 저장 디렉토리 (None 이면 로그 저장 안 함)
-
-    Returns
-    -------
-    out_dir : 결과 디렉토리 경로
+    [Legacy] sanit_dir 내 모든 NPZ를 슬라이딩 윈도우로 분할하여 out_dir에 저장.
+    현재 파이프라인에서는 apply_sliding_window_csv() 를 사용.
     """
     window_samples = int(round(window_sec * fs))
     hop_samples    = int(round(hop_sec    * fs))
@@ -134,17 +260,16 @@ def apply_sliding_window(
 
     all_files = sorted(glob.glob(os.path.join(sanit_dir, "*.npz")))
     if not all_files:
-        print(f"[Window] No NPZ files found in {sanit_dir}")
+        print(f"[Window/NPZ] No NPZ files found in {sanit_dir}")
         return out_dir
 
     print(
-        f"[Window] window={window_sec}s ({window_samples}samp)  "
+        f"[Window/NPZ] window={window_sec}s ({window_samples}samp)  "
         f"hop={hop_sec}s ({hop_samples}samp)  "
-        f"overlap={1 - hop_sec/window_sec:.0%}  "
-        f"files={len(all_files)}"
+        f"overlap={1 - hop_sec/window_sec:.0%}  files={len(all_files)}"
     )
 
-    t0 = time.time()
+    t0            = time.time()
     total_windows = 0
     success, failed = 0, []
 
@@ -155,14 +280,14 @@ def apply_sliding_window(
                 out_path = os.path.join(out_dir, seg["stem"] + ".npz")
                 np.savez_compressed(out_path, time=seg["time"], csi=seg["csi"])
             total_windows += len(segs)
-            success += 1
+            success       += 1
         except Exception as e:
             failed.append({"file": os.path.basename(fp), "error": str(e)})
             print(f"  [FAIL] {os.path.basename(fp)}: {e}")
 
     elapsed = time.time() - t0
     print(
-        f"[Window] Done → {total_windows} windows from {success} files  "
+        f"[Window/NPZ] Done → {total_windows} windows from {success} files  "
         f"({elapsed:.1f}s)  → {out_dir}"
     )
 
@@ -171,27 +296,27 @@ def apply_sliding_window(
         run_id  = datetime.now().strftime("%Y%m%d_%H%M%S")
         payload = {
             "timestamp": datetime.now().isoformat(),
+            "mode": "npz",
             "params": {
-                "window_sec": window_sec,
+                "window_sec":    window_sec,
                 "window_samples": window_samples,
-                "hop_sec": hop_sec,
-                "hop_samples": hop_samples,
-                "fs": fs,
+                "hop_sec":       hop_sec,
+                "hop_samples":   hop_samples,
+                "fs":            fs,
                 "overlap_ratio": round(1 - hop_sec / window_sec, 4),
             },
             "summary": {
-                "input_files": len(all_files),
-                "success": success,
-                "failed": len(failed),
+                "input_files":   len(all_files),
+                "success":       success,
+                "failed":        len(failed),
                 "total_windows": total_windows,
-                "avg_windows_per_file": round(total_windows / max(success, 1), 2),
-                "elapsed_sec": round(elapsed, 2),
+                "elapsed_sec":   round(elapsed, 2),
             },
             "failures": failed,
         }
         log_path = os.path.join(log_dir, f"{run_id}_windowing_log.json")
         with open(log_path, "w", encoding="utf-8") as f:
             json.dump(payload, f, indent=4, ensure_ascii=False)
-        print(f"[Window] Log → {log_path}")
+        print(f"[Window/NPZ] Log → {log_path}")
 
     return out_dir

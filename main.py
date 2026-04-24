@@ -140,7 +140,8 @@ def run_single(args) -> dict:
 #  Ablation Sweep 실행
 # ══════════════════════════════════════════════════════════════
 
-def run_ablation(ablation_path: str) -> None:
+def run_ablation(args) -> None:
+    ablation_path = args.ablation
     abl_cfg = load_config(ablation_path)
 
     base_path = abl_cfg.get("base_config", "configs/default.yaml")
@@ -153,6 +154,13 @@ def run_ablation(ablation_path: str) -> None:
     global_overrides = abl_cfg.get("overrides", {})
     for dot_path, value in global_overrides.items():
         set_nested(base_cfg, dot_path, value)
+
+    # CLI --set 오버라이드 (파일 override 보다 우선순위 높음)
+    if args.overrides:
+        for kv in args.overrides:
+            if "=" in kv:
+                key, _, val = kv.partition("=")
+                set_nested(base_cfg, key.strip(), parse_value(val.strip()))
 
     sweep_list = abl_cfg.get("sweep", [])
     if not sweep_list:
@@ -184,8 +192,9 @@ def run_ablation(ablation_path: str) -> None:
         exp_name = f"{param_name.split('.')[-1]}_{val_str}"
         exp_cfg["experiment"]["name"] = exp_name
         # sweep context 주입
-        exp_cfg["experiment"]["_sweep_name"] = sweep_name
-        exp_cfg["experiment"]["_sweep_ts"]   = sweep_ts
+        exp_cfg["experiment"]["_sweep_name"]    = sweep_name
+        exp_cfg["experiment"]["_sweep_ts"]      = sweep_ts
+        exp_cfg["experiment"]["_ablation_param"] = param_name
 
         print(f"\n[{i}/{total}] {param_name} = {param_value}")
 
@@ -269,10 +278,9 @@ def main():
 
     if args.ablation:
         # Ablation sweep 모드
-        ablation_path = args.ablation
-        if not os.path.isabs(ablation_path):
-            ablation_path = os.path.join(BASE_DIR, ablation_path)
-        run_ablation(ablation_path)
+        if not os.path.isabs(args.ablation):
+            args.ablation = os.path.join(BASE_DIR, args.ablation)
+        run_ablation(args)
 
     else:
         # 단일 실험 모드

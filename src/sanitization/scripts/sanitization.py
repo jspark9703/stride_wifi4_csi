@@ -158,7 +158,7 @@ async def run_sanitization(prep_dir=PREPROCESSED_DIR, sanit_dir=SANITIZATION_DIR
     else:
         print("[Sanitization] No hardware template specified or found. Skipping nonlinear template correction.")
     
-    all_files = glob.glob(os.path.join(in_dir, "*.npz"))
+    all_files = glob.glob(os.path.join(in_dir, "**", "*.npz"), recursive=True)
     total_files = len(all_files)
     
     if total_files == 0:

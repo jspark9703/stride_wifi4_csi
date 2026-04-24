@@ -71,7 +71,7 @@ def validate_config(cfg: dict) -> None:
     if sw.get("enabled", False):
         w = sw.get("window_sec", 1.0)
         h = sw.get("hop_sec", 0.5)
-        if not (0.5 <= w <= 2.0):
-            raise ValueError(f"sliding_window.window_sec={w} 범위 초과 (0.5~2.0)")
+        if not (0.5 <= w <= 5.0):
+            raise ValueError(f"sliding_window.window_sec={w} 범위 초과 (0.5~5.0)")
         if h >= w:
             raise ValueError(f"hop_sec({h}) >= window_sec({w}) — hop이 너무 큼")

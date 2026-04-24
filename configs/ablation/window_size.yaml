@@ -4,7 +4,7 @@ base_config: "configs/default.yaml"
 
 sweep:
   - param: "sliding_window.window_sec"
-    values: [0.8, 0.9, 1.0]
+    values: [1.0, 1.5, 2.0, 2.5]
     # 0.8s=80samp, 0.9s=90samp, 1.0s=100samp @ 100Hz
 
 overrides:
