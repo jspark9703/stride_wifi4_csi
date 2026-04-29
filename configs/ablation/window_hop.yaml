@@ -1,6 +1,6 @@
 # Ablation: 슬라이딩 윈도우 hop 크기 (overlap 비율)
 # 작은 hop → 높은 overlap → 샘플 수 증가 (데이터 증강)
-base_config: "configs/default.yaml"
+base_config: "configs/baseline.yaml"
 
 sweep:
   - param: "sliding_window.hop_sec"

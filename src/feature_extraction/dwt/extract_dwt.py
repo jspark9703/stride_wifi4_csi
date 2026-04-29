@@ -87,18 +87,34 @@ def load_amplitude(npz_path: str) -> np.ndarray:
 # ─────────────────────────────────────────────
 # STEP 2: PCA 降維
 # ─────────────────────────────────────────────
-def apply_pca(amplitude: np.ndarray, n_components: int = 6) -> np.ndarray:
+def apply_pca(amplitude: np.ndarray, n_components: int = 6, del_pca_1: bool = False) -> np.ndarray:
     """
     서브캐리어 108차원 → n_components 주성분
 
+    Parameters
+    ----------
+    del_pca_1 : bool
+        True면 첫 번째 주성분(PC1) 제거 후 나머지 n_components-1개 반환.
+        PC1은 데이터의 평균값/DC 성분을 주로 포함하며 순수 채널 변동을
+        포선하기 위해 제거.
+
     Returns
     -------
-    pca_streams : (N_packets, n_components) float32
+    pca_streams : (N_packets, n_components) or (N_packets, n_components-1) float32
     """
-    if amplitude.shape[0] < n_components:
-        n_components = amplitude.shape[0]
-    pca = PCA(n_components=n_components)
-    pca_streams = pca.fit_transform(amplitude)   # (N, K)
+    if del_pca_1:
+        # PC1을 제거하려면 n_components+1개를 구해서 PC2 이후를 선택
+        n_calc = min(n_components + 1, amplitude.shape[0])
+    else:
+        n_calc = n_components if amplitude.shape[0] >= n_components else amplitude.shape[0]
+
+    pca = PCA(n_components=n_calc)
+    pca_streams = pca.fit_transform(amplitude)  # (N, n_calc)
+
+    if del_pca_1:
+        pca_streams = pca_streams[:, 1:]        # PC1 제거, 나머지 n_components개
+        pca_streams = pca_streams[:, :n_components]  # 정확히 n_components개로 자르기
+
     return pca_streams.astype(np.float32)
 
 
@@ -179,26 +195,35 @@ def dwt_energy_features(signal_1d: np.ndarray, wavelet: str, level: int) -> np.n
 # 파일 하나 처리
 # ─────────────────────────────────────────────
 def extract_features_single(
-    npz_path: str,
-    wavelet: str = "sym3",
-    level: int = 10,
-    n_pca: int = 6,
+    npz_path:  str,
+    wavelet:   str  = "sym3",
+    level:     int  = 10,
+    n_pca:     int  = 6,
+    del_pca_1: bool = False,
 ) -> np.ndarray:
     """
     Returns
     -------
     feature_vec : (n_pca * (level + 1),) float32
+
+    Notes
+    -----
+    Zero-padding 기준: `(filter_len - 1) * 2^level`
+      - 이 값은 pywt.dwt_max_level(N, wavelet) >= level 을 보장하는 최소 N.
+      - 공식: floor(log2(N / (filter_len-1))) >= level  →  N >= (filter_len-1) * 2^level
+      - 기존 `2^(level+1)` 공식은 filter_len=6(sym3) 기준으로 (filter_len-1=5) > 2 이므로
+        항상 부족하여, 짧은 신호에서 effective level이 낮아져 feature_dim 불일치 발생.
     """
     amplitude = load_amplitude(npz_path)     # (N, 108)
 
-    # 너무 짧은 시계열 예외 처리
-    min_len = 2 ** (level + 1)
+    # 짧은 시계열 zero-padding: 모든 샘플이 effective_level == level 이 되도록 보장
+    filter_len = pywt.Wavelet(wavelet).dec_len          # sym3 → 6
+    min_len    = (filter_len - 1) * (2 ** level)        # 보장 공식: (L-1) * 2^level
     if amplitude.shape[0] < min_len:
-        # zero-pad
         pad = np.zeros((min_len - amplitude.shape[0], amplitude.shape[1]), dtype=np.float32)
         amplitude = np.vstack([amplitude, pad])
 
-    pca_streams = apply_pca(amplitude, n_components=n_pca)  # (N, K)
+    pca_streams = apply_pca(amplitude, n_components=n_pca, del_pca_1=del_pca_1)  # (N, K)
 
     feature_parts = []
     for k in range(pca_streams.shape[1]):
@@ -220,11 +245,12 @@ def extract_features_single(
 # ─────────────────────────────────────────────
 def run_dwt_extraction(
     sanit_dir: str = DEFAULT_SANIT_DIR,
-    out_dir: str = DEFAULT_OUT_DIR,
-    log_dir: str = DEFAULT_LOG_DIR,
-    wavelet: str = "sym3",
-    level: int = 10,
-    n_pca: int = 6,
+    out_dir:   str = DEFAULT_OUT_DIR,
+    log_dir:   str = DEFAULT_LOG_DIR,
+    wavelet:   str = "sym3",
+    level:     int = 10,
+    n_pca:     int = 6,
+    del_pca_1: bool = False,
 ):
     ensure_dir(out_dir)
     ensure_dir(log_dir)
@@ -239,9 +265,10 @@ def run_dwt_extraction(
         print(f"[DWT] No NPZ files found in {sanit_dir}")
         return
 
-    print(f"[DWT] Processing {total} files  |  wavelet={wavelet}, level={level}, n_pca={n_pca}")
-    feature_dim = n_pca * (level + 1)
-    print(f"[DWT] Output feature dimension = {feature_dim}")
+    n_used = n_pca - 1 if del_pca_1 else n_pca
+    feature_dim = n_used * (level + 1)
+    print(f"[DWT] Processing {total} files  |  wavelet={wavelet}, level={level}, n_pca={n_pca}, del_pca_1={del_pca_1}")
+    print(f"[DWT] Output feature dimension = {feature_dim}  (n_used_pca={n_used})") 
 
     start = time.time()
     results = []
@@ -250,7 +277,7 @@ def run_dwt_extraction(
     for i, fp in enumerate(all_files):
         fname = os.path.basename(fp)
         try:
-            feat = extract_features_single(fp, wavelet=wavelet, level=level, n_pca=n_pca)
+            feat = extract_features_single(fp, wavelet=wavelet, level=level, n_pca=n_pca, del_pca_1=del_pca_1)
             label, subject = _parse_label_subject(fp)
 
             out_path = os.path.join(out_dir, fname)
@@ -277,9 +304,10 @@ def run_dwt_extraction(
         "execution_timestamp": datetime.now().isoformat(),
         "pipeline_stage": "feature_extraction_dwt",
         "params": {
-            "wavelet": wavelet,
-            "level": level,
-            "n_pca": n_pca,
+            "wavelet":   wavelet,
+            "level":     level,
+            "n_pca":     n_pca,
+            "del_pca_1": del_pca_1,
             "feature_dim": feature_dim,
         },
         "summary": {

@@ -1,5 +1,5 @@
 # Ablation: MLP 은닉층 구조
-base_config: "configs/default.yaml"
+base_config: "configs/baseline.yaml"
 
 sweep:
   - param: "learning.hidden"

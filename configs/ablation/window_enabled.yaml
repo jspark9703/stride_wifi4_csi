@@ -1,6 +1,6 @@
 # Ablation: 슬라이딩 윈도우 활성화 여부
 # 전체 신호 vs 1초 윈도우 분할 성능 비교
-base_config: "configs/default.yaml"
+base_config: "configs/baseline.yaml"
 
 sweep:
   - param: "sliding_window.enabled"

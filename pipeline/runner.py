@@ -237,11 +237,12 @@ def _step_window(cfg: dict, dirs: dict) -> None:
     sw = cfg["sliding_window"]
 
     apply_sliding_window_csv(
-        raw_dir    = dirs["raw"],
-        out_dir    = dirs["windowed"],
-        window_sec = sw.get("window_sec", 2.5),
-        hop_sec    = sw.get("hop_sec",    0.5),
-        log_dir    = dirs["log_win"],
+        raw_dir          = dirs["raw"],
+        out_dir          = dirs["windowed"],
+        window_sec       = sw.get("window_sec",       2.5),
+        hop_sec          = sw.get("hop_sec",          0.5),
+        min_segment_size = sw.get("min_segment_size", 0.0),
+        log_dir          = dirs["log_win"],
     )
 
 
@@ -263,9 +264,10 @@ def _step_extract(cfg: dict, dirs: dict) -> None:
             sanit_dir = dirs["feat_input"],
             out_dir   = dirs["feat"],
             log_dir   = dirs["res_feat"],
-            wavelet   = mcfg.get("wavelet", "sym3"),
-            level     = mcfg.get("level",   10),
-            n_pca     = mcfg.get("n_pca",   6),
+            wavelet   = mcfg.get("wavelet",   "sym3"),
+            level     = mcfg.get("level",     10),
+            n_pca     = mcfg.get("n_pca",     6),
+            del_pca_1 = mcfg.get("del_pca_1", False),
         )
 
     elif method == "dfs":
@@ -304,6 +306,18 @@ def _step_extract(cfg: dict, dirs: dict) -> None:
             delta_t_max = mcfg.get("delta_t_max", 10),
             fc_hz       = mcfg.get("fc_hz",       5.18e9),
         )
+    elif method == "seq":
+        _add_path(os.path.join(BASE_DIR, "src", "feature_extraction", "seq"))
+        import extract_seq
+        extract_seq.run_seq_extraction(
+            sanit_dir = dirs["feat_input"],
+            out_dir   = dirs["feat"],
+            log_dir   = dirs["res_feat"],
+            wavelet   = mcfg.get("wavelet",   "sym3"),
+            level     = mcfg.get("level",     10),
+            n_pca     = mcfg.get("n_pca",     6),
+            del_pca_1 = mcfg.get("del_pca_1", False),
+        )
 
     else:
         raise ValueError(f"Unknown method: {method}")
@@ -323,6 +337,8 @@ def _step_train(cfg: dict, dirs: dict) -> dict:
 
     _add_path(os.path.join(BASE_DIR, "src", "learning", "mlp"))
 
+    # ablation sweep 실행 여부 판단 → 결과 파일 이름 정책 결정
+    is_sweep   = bool(cfg["experiment"].get("_sweep_name"))
     # 공통 args namespace
     args = types.SimpleNamespace(
         feat_dir   = dirs["feat"],
@@ -338,6 +354,7 @@ def _step_train(cfg: dict, dirs: dict) -> dict:
         infer_file = None,
         infer_dir  = None,
         is_feat    = True,
+        overwrite  = not is_sweep,   # 단일 실행=True(덮어쓰기), sweep=False(타임스탬프)
     )
 
     if method == "dwt":
@@ -374,6 +391,17 @@ def _step_train(cfg: dict, dirs: dict) -> dict:
         args.fc_hz       = mcfg.get("fc_hz",       5.18e9)
         X, y, subjects   = trainer.load_dataset(args)
 
+    elif method == "seq":
+        model_type = lcfg.get("model_type", "lstm")
+        _add_path(os.path.join(BASE_DIR, "src", "learning", "seq"))
+        if model_type == "lstm":
+            import seq_lstm as trainer
+        elif model_type == "rnn":
+            import seq_rnn as trainer
+        else:
+            raise ValueError(f"Unknown model_type for seq method: {model_type}")
+        X, y, subjects = trainer.load_from_feature_npz(args.feat_dir)
+
     else:
         raise ValueError(f"Unknown method: {method}")
 
@@ -384,7 +412,12 @@ def _step_train(cfg: dict, dirs: dict) -> dict:
     trainer.train_and_evaluate(X, y, subjects, args)
 
     # 저장된 meta JSON에서 지표 읽기
-    meta_path = os.path.join(dirs["models"], f"{method}_mlp_meta.json")
+    if method == "seq":
+        model_type = lcfg.get("model_type", "lstm")
+        meta_path = os.path.join(dirs["models"], f"seq_{model_type}_meta.json")
+    else:
+        meta_path = os.path.join(dirs["models"], f"{method}_mlp_meta.json")
+        
     if os.path.exists(meta_path):
         with open(meta_path, encoding="utf-8") as f:
             return json.load(f)

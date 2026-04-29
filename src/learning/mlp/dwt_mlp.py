@@ -210,7 +210,17 @@ def train_and_evaluate(X, y, subjects, args):
 
     # ── 결과 저장
     ts = datetime.now().strftime("%Y%m%d_%H%M%S")
-    report_path = os.path.join(args.result_dir, f"dwt_mlp_report_{ts}.txt")
+    # overwrite=True (단일 실행): 고정 파일명으로 덮어씌우기
+    # overwrite=False (ablation): 타임스탬프 포함 파일명으로 누적 보관
+    overwrite = getattr(args, "overwrite", True)
+    if overwrite:
+        report_fname = "dwt_mlp_report.txt"
+        confusion_tag = ""   # dwt_confusion.png
+    else:
+        report_fname  = f"dwt_mlp_report_{ts}.txt"
+        confusion_tag = ts
+
+    report_path = os.path.join(args.result_dir, report_fname)
     with open(report_path, "w", encoding="utf-8") as f:
         f.write(f"DWT-MLP Classification Report\n")
         f.write(f"Timestamp : {ts}\n")
@@ -224,7 +234,7 @@ def train_and_evaluate(X, y, subjects, args):
     print(f"[Result] Report saved → {report_path}")
 
     # ── 혼동행렬 시각화
-    _plot_confusion(cm, classes, ts, args.result_dir)
+    _plot_confusion(cm, classes, confusion_tag, args.result_dir)
 
     # ── 5-Fold CV 추가 평가
     print("\n[CV] 5-Fold Cross Validation...")
@@ -290,7 +300,8 @@ def _plot_confusion(cm, classes, ts, result_dir):
     cbar.ax.tick_params(colors=TEXT, labelsize=8)
 
     plt.tight_layout()
-    out = os.path.join(result_dir, f"dwt_confusion_{ts}.png")
+    fname = "dwt_confusion.png" if not ts else f"dwt_confusion_{ts}.png"
+    out = os.path.join(result_dir, fname)
     fig.savefig(out, dpi=150, bbox_inches="tight", facecolor=BG)
     plt.close(fig)
     print(f"[Result] Confusion matrix → {out}")

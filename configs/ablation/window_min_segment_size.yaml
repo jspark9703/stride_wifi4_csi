@@ -1,0 +1,12 @@
+# Ablation: 세그먼트 유효 최소 길이 [초]
+# window_sec=2.5s로 분할 후 남은 세그먼트의 실제 지속 시간이
+# min_segment_size 미만이면 해당 세그먼트를 학습 데이터에서 제외.
+# 0.0 = 비활성 (짧은 마지막 세그먼트도 포함)
+base_config: "configs/baseline.yaml"
+
+sweep:
+  - param: "sliding_window.min_segment_size"
+    values: [1.0, 1.5, 2.0]
+
+overrides:
+  experiment.steps: [window, preprocess, sanitize, extract, train]

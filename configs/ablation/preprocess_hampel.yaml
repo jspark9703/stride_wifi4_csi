@@ -1,5 +1,5 @@
 # Ablation: Hampel 이상치 필터 활성화 여부
-base_config: "configs/default.yaml"
+base_config: "configs/baseline.yaml"
 
 sweep:
   - param: "preprocessing.hampel_enabled"

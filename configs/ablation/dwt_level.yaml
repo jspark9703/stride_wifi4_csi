@@ -1,9 +1,9 @@
 # Ablation: DWT 분해 레벨 (특징 차원 = n_pca × (level+1))
-base_config: "configs/default.yaml"
+base_config: "configs/baseline.yaml"
 
 sweep:
   - param: "feature_extraction.dwt.level"
-    values: [5, 8, 10, 12, 15]
+    values: [5,6]
 
 overrides:
   experiment.steps: [extract, train]

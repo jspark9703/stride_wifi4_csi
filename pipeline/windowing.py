@@ -63,11 +63,12 @@ def _split_stem(stem: str):
 # ══════════════════════════════════════════════════════════════
 
 def apply_sliding_window_csv(
-    raw_dir:    str,
-    out_dir:    str,
-    window_sec: float = 2.5,
-    hop_sec:    float = 0.5,
-    log_dir:    str   = None,
+    raw_dir:          str,
+    out_dir:          str,
+    window_sec:       float = 2.5,
+    hop_sec:          float = 0.5,
+    min_segment_size: float = 0.0,
+    log_dir:          str   = None,
 ) -> str:
     """
     raw_dir 내 모든 raw CSV를 시간 기반 슬라이딩 윈도우로 분할하고
@@ -75,11 +76,14 @@ def apply_sliding_window_csv(
 
     Parameters
     ----------
-    raw_dir    : 원본 CSV 디렉토리 (하위 폴더 포함 재귀 탐색)
-    out_dir    : windowed CSV 저장 디렉토리
-    window_sec : 윈도우 크기 [초]
-    hop_sec    : hop 크기 [초]
-    log_dir    : JSON 로그 저장 디렉토리 (None 이면 저장 안 함)
+    raw_dir           : 원본 CSV 디렉토리 (하위 폴더 포함 재귀 탐색)
+    out_dir           : windowed CSV 저장 디렉토리
+    window_sec        : 윈도우 크기 [초]
+    hop_sec           : hop 크기 [초]
+    min_segment_size  : 세그먼트 유효 최소 길이 [초] (0.0 = 비활성)
+                        window 쪽로 잘라나고 남은 마지막 부분 세그먼트의
+                        실제 시간 길이가 이 값 미만이면 펴기.
+    log_dir           : JSON 로그 저장 디렉토리 (None 이면 저장 안 함)
 
     Returns
     -------
@@ -124,18 +128,31 @@ def apply_sliding_window_csv(
             windows = []
             start_t = 0.0
             w_idx   = 0
+            skipped = 0
 
             while start_t + window_sec <= T + 1e-6:
                 end_t = start_t + window_sec
                 mask  = (t_rel >= start_t - 1e-9) & (t_rel < end_t - 1e-9)
                 if mask.sum() > 0:
-                    windows.append((w_idx, df[mask].copy()))
+                    w_df = df[mask].copy()
+                    # min_segment_size 필터링:
+                    # 실제 시간 기간이 최소 길이 미만이면 펴기
+                    if min_segment_size > 0.0:
+                        w_ts    = pd.to_datetime(w_df["timestamp"], format="ISO8601")
+                        seg_dur = (w_ts.iloc[-1] - w_ts.iloc[0]).total_seconds()
+                        if seg_dur < min_segment_size:
+                            skipped += 1
+                            start_t += hop_sec
+                            w_idx   += 1
+                            continue
+                    windows.append((w_idx, w_df))
                 start_t += hop_sec
                 w_idx   += 1
 
             # 신호가 window_sec보다 짧으면 전체를 단일 윈도우로 처리
             if not windows:
                 windows = [(0, df.copy())]
+                skipped = 0
 
             for i, w_df in windows:
                 out_name = f"{base}_w{i:02d}_{label}.csv"
@@ -143,6 +160,8 @@ def apply_sliding_window_csv(
 
             total_windows += len(windows)
             success       += 1
+            if skipped:
+                print(f"  [Window] {os.path.basename(fp)}: {skipped} segment(s) skipped (< {min_segment_size}s)")
 
         except Exception as e:
             failed.append({"file": os.path.basename(fp), "error": str(e)})
@@ -161,9 +180,10 @@ def apply_sliding_window_csv(
             "timestamp": datetime.now().isoformat(),
             "mode": "csv",
             "params": {
-                "window_sec":    window_sec,
-                "hop_sec":       hop_sec,
-                "overlap_ratio": round(1 - hop_sec / window_sec, 4),
+                "window_sec":       window_sec,
+                "hop_sec":          hop_sec,
+                "min_segment_size": min_segment_size,
+                "overlap_ratio":    round(1 - hop_sec / window_sec, 4),
             },
             "summary": {
                 "input_files":   len(all_files),
