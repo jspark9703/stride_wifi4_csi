@@ -179,281 +179,42 @@ def load_dataset(args):
         return load_from_sanit(args.sanit_dir, args.n_fft, args.hop, args.doppler_hz)
 
 
-# ══════════════════════════════════════════════════════════════
-# B. PCA + MLP 파이프라인
-# ══════════════════════════════════════════════════════════════
-
-def build_pipeline(n_pca: int, hidden_layers: tuple, activation: str,
-                   max_iter: int, lr_init: float) -> Pipeline:
-    """
-    StandardScaler → PCA(n_pca) → MLPClassifier
-
-    DFS 통계 벡터 (n_freq×4 ≈ 256dim)는 상관 성분이 많으므로
-    PCA로 압축하여 분류에 효과적인 주성분만 사용.
-    """
-    mlp = MLPClassifier(
-        hidden_layer_sizes=hidden_layers,
-        activation=activation,
-        solver="adam",
-        alpha=1e-4,            # L2 정규화
-        batch_size=32,
-        learning_rate="adaptive",
-        learning_rate_init=lr_init,
-        max_iter=max_iter,
-        random_state=42,
-        early_stopping=True,
-        validation_fraction=0.1,
-        n_iter_no_change=20,
-        verbose=False,
-    )
-    return Pipeline([
-        ("scaler", StandardScaler()),
-        ("pca",    PCA(n_components=n_pca, random_state=42)),
-        ("mlp",    mlp),
-    ])
-
 
 # ══════════════════════════════════════════════════════════════
-# C. 학습 & 평가
+# PyTorch MLP Adapter
 # ══════════════════════════════════════════════════════════════
-
-def _plot_confusion(cm, classes, ts, tag, result_dir):
-    fig, ax = plt.subplots(figsize=(5, 4), facecolor=BG)
-    ax.set_facecolor(PANEL); ax.spines[:].set_color(GRID)
-    ax.tick_params(colors=TEXT)
-
-    im = ax.imshow(cm, cmap="Blues", vmin=0)
-    ax.set_xticks(range(len(classes))); ax.set_xticklabels(classes, color=TEXT)
-    ax.set_yticks(range(len(classes)));
-    ax.set_yticklabels(classes, color=TEXT, rotation=90, va="center")
-    ax.set_xlabel("Predicted", color=TEXT); ax.set_ylabel("True", color=TEXT)
-    ax.set_title(f"DFS-MLP Confusion Matrix", color=TEXT, fontsize=12, pad=8)
-
-    cm_norm = cm.astype(float) / (cm.sum(axis=1, keepdims=True) + 1e-10)
-    for i in range(len(classes)):
-        for j in range(len(classes)):
-            tc = "white" if cm_norm[i, j] > 0.5 else TEXT
-            ax.text(j, i - 0.15, f"{cm_norm[i,j]*100:.1f}%",
-                    ha="center", va="center", fontsize=12, color=tc, fontweight="bold")
-            ax.text(j, i + 0.2,  f"({cm[i,j]})",
-                    ha="center", va="center", fontsize=9,  color=tc)
-
-    cbar = fig.colorbar(im, ax=ax, fraction=0.04, pad=0.02)
-    cbar.ax.tick_params(colors=TEXT, labelsize=8)
-    plt.tight_layout()
-
-    out = os.path.join(result_dir, f"dfs_confusion_{ts}.png")
-    fig.savefig(out, dpi=150, bbox_inches="tight", facecolor=BG)
-    plt.close(fig)
-    print(f"[Result] Confusion matrix → {out}")
-
+import sys
+if os.path.join(BASE_DIR, "src", "learning", "mlp") not in sys.path:
+    sys.path.append(os.path.join(BASE_DIR, "src", "learning", "mlp"))
+from pytorch_mlp_utils import train_and_evaluate_pytorch, run_inference_pytorch
 
 def train_and_evaluate(X, y, subjects, args):
-    os.makedirs(args.model_dir,  exist_ok=True)
-    os.makedirs(args.result_dir, exist_ok=True)
+    feature_desc = f"Feature    : DFS Power Spectrogram → Freq-axis stats (mean/std/max/skew per bin)\n             n_fft={args.n_fft}, hop={args.hop}, doppler_hz=±{args.doppler_hz}Hz"
+    meta_extras = {"n_fft": args.n_fft, "hop": args.hop, "doppler_hz": args.doppler_hz}
+    return train_and_evaluate_pytorch(X, y, subjects, args, "dfs", feature_desc, meta_extras=meta_extras, use_pca=True)
 
-    le      = LabelEncoder()
-    y_enc   = le.fit_transform(y)
-    classes = le.classes_
-
-    print(f"\n[Train] Classes: {classes}  |  Total: {len(X)}  |  Feature dim: {X.shape[1]}")
-    for cls in classes:
-        print(f"  {cls}: {(y == cls).sum()} samples")
-
-    # ── Hold-out 80/20
-    X_tr, X_te, y_tr, y_te = train_test_split(
-        X, y_enc, test_size=0.2, random_state=42, stratify=y_enc
-    )
-    print(f"\n[Train] Hold-out → Train={len(X_tr)}, Test={len(X_te)}")
-
-    n_pca_actual = min(args.n_pca, X_tr.shape[0], X_tr.shape[1])
-    pipe = build_pipeline(
-        n_pca=n_pca_actual,
-        hidden_layers=tuple(args.hidden),
-        activation=args.activation,
-        max_iter=args.epochs,
-        lr_init=args.lr,
-    )
-    pipe.fit(X_tr, y_tr)
-
-    y_pred = pipe.predict(X_te)
-    acc    = accuracy_score(y_te, y_pred)
-    report = classification_report(y_te, y_pred, target_names=classes)
-    cm     = confusion_matrix(y_te, y_pred)
-
-    print(f"\n[Result] Test Accuracy: {acc:.4f}")
-    print(report)
-
-    # ── 결과 저장
-    ts = datetime.now().strftime("%Y%m%d_%H%M%S")
-    report_path = os.path.join(args.result_dir, f"dfs_mlp_report_{ts}.txt")
-    with open(report_path, "w", encoding="utf-8") as f:
-        f.write("DFS-MLP Classification Report\n")
-        f.write(f"Timestamp  : {ts}\n")
-        f.write(f"Feature    : DFS Power Spectrogram → Freq-axis stats (mean/std/max/skew per bin)\n")
-        f.write(f"             n_fft={args.n_fft}, hop={args.hop}, doppler_hz=±{args.doppler_hz}Hz\n")
-        f.write(f"             Raw dim={X.shape[1]}  →  PCA n_components={n_pca_actual}\n")
-        f.write(f"Hidden     : {args.hidden}  Activation={args.activation}\n")
-        f.write(f"Epochs     : {args.epochs}  LR={args.lr}\n")
-        f.write(f"Train/Test : {len(X_tr)} / {len(X_te)}\n\n")
-        f.write(f"Test Accuracy: {acc:.4f}\n\n")
-        f.write(report)
-        f.write(f"\nConfusion Matrix:\n{cm}\n")
-    print(f"[Result] Report → {report_path}")
-
-    _plot_confusion(cm, classes, ts, "dfs", args.result_dir)
-
-    # ── 5-Fold CV
-    print("\n[CV] 5-Fold Cross Validation...")
-    cv_accs = []
-    kf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
-    for fold, (tr_idx, val_idx) in enumerate(kf.split(X, y_enc)):
-        cv_pipe = build_pipeline(n_pca_actual, tuple(args.hidden),
-                                  args.activation, args.epochs, args.lr)
-        cv_pipe.fit(X[tr_idx], y_enc[tr_idx])
-        fold_acc = accuracy_score(y_enc[val_idx], cv_pipe.predict(X[val_idx]))
-        cv_accs.append(fold_acc)
-        print(f"  Fold {fold+1}: {fold_acc:.4f}")
-    print(f"  CV Mean±Std: {np.mean(cv_accs):.4f} ± {np.std(cv_accs):.4f}")
-
-    # ── 결과 파일에 CV 추가
-    with open(report_path, "a", encoding="utf-8") as f:
-        f.write(f"\n5-Fold CV: {[round(a,4) for a in cv_accs]}\n")
-        f.write(f"CV Mean: {np.mean(cv_accs):.4f}  CV Std: {np.std(cv_accs):.4f}\n")
-
-    # ── 모델 저장
-    model_path = os.path.join(args.model_dir, "dfs_mlp.pkl")
-    le_path    = os.path.join(args.model_dir, "dfs_label_encoder.pkl")
-    meta_path  = os.path.join(args.model_dir, "dfs_mlp_meta.json")
-
-    with open(model_path, "wb") as f: pickle.dump(pipe, f)
-    with open(le_path,    "wb") as f: pickle.dump(le,   f)
-
-    meta = {
-        "feature_type": "dfs_stat",
-        "n_fft":        args.n_fft,
-        "hop":          args.hop,
-        "doppler_hz":   args.doppler_hz,
-        "raw_feat_dim": int(X.shape[1]),
-        "n_pca":        n_pca_actual,
-        "hidden":       args.hidden,
-        "activation":   args.activation,
-        "classes":      list(classes),
-        "test_accuracy": float(acc),
-        "cv_mean":       float(np.mean(cv_accs)),
-        "cv_std":        float(np.std(cv_accs)),
-        "timestamp":     ts,
-    }
-    with open(meta_path, "w", encoding="utf-8") as f:
-        json.dump(meta, f, indent=4, ensure_ascii=False)
-
-    print(f"[Model] Saved → {model_path}")
-    print(f"[Model] Meta  → {meta_path}")
-    return pipe, le
-
-
-# ══════════════════════════════════════════════════════════════
-# D. 추론
-# ══════════════════════════════════════════════════════════════
+def _ext(fp, args, meta):
+    _ext_path = os.path.join(BASE_DIR, "feature_extraction", "dfs")
+    if _ext_path not in sys.path: sys.path.insert(0, _ext_path)
+    from extract_dfs import extract_features_single
+    res = extract_features_single(fp, n_fft=meta.get("n_fft", args.n_fft), hop=meta.get("hop", args.hop), doppler_hz=meta.get("doppler_hz", args.doppler_hz))
+    return _spectrogram_to_stat_vector(res["dfs_power"])
 
 def run_inference(args):
-    model_path = args.model_path or os.path.join(args.model_dir, "dfs_mlp.pkl")
-    le_path    = os.path.join(args.model_dir, "dfs_label_encoder.pkl")
-    meta_path  = os.path.join(args.model_dir, "dfs_mlp_meta.json")
-
-    if not os.path.exists(model_path):
-        print(f"[ERROR] Model not found: {model_path}"); sys.exit(1)
-
-    with open(model_path, "rb") as f: pipe = pickle.load(f)
-    with open(le_path,    "rb") as f: le   = pickle.load(f)
-    with open(meta_path,  "r")  as f: meta = json.load(f)
-
-    n_fft      = meta.get("n_fft",      args.n_fft)
-    hop        = meta.get("hop",         args.hop)
-    doppler_hz = meta.get("doppler_hz",  args.doppler_hz)
-    classes    = meta.get("classes",     le.classes_.tolist())
-
-    # feat 추출 모듈
-    _ext = os.path.join(BASE_DIR, "feature_extraction", "dfs")
-    if _ext not in sys.path: sys.path.insert(0, _ext)
-    from extract_dfs import extract_features_single
-
+    import random
+    random.seed(42)
     targets = [args.infer_file] if args.infer_file else []
     if not targets:
-        import random; random.seed(42)
-        files   = sorted(glob.glob(os.path.join(args.feat_dir, "*.npz")))
+        files = sorted(glob.glob(os.path.join(args.feat_dir, "*.npz")))
         if not files:
             files = sorted(glob.glob(os.path.join(args.sanit_dir, "*.npz")))
         targets = random.sample(files, min(20, len(files)))
-
-    print(f"\n{'─'*68}")
-    print(f"{'File':<40} {'True':>6} {'Pred':>6} {'Conf':>8}")
-    print(f"{'─'*68}")
-
-    correct = 0
-    for fp in targets:
-        true_label = _parse_label(fp) or "?"
-        try:
-            # feature NPZ 우선 로드
-            fname = os.path.basename(fp)
-            feat_fp = os.path.join(args.feat_dir, fname)
-            if os.path.exists(feat_fp):
-                d    = np.load(feat_fp, allow_pickle=True)
-                feat = _spectrogram_to_stat_vector(d["dfs_power"].astype(np.float32))
-            else:
-                res  = extract_features_single(fp, n_fft=n_fft, hop=hop, doppler_hz=doppler_hz)
-                feat = _spectrogram_to_stat_vector(res["dfs_power"])
-
-            prob  = pipe.predict_proba(feat.reshape(1, -1))[0]
-            pred  = le.inverse_transform([prob.argmax()])[0]
-            conf  = prob.max()
-            match = "✓" if pred == true_label else "✗"
-            print(f"  {fname[:36]:<40} {true_label:>6} {pred:>6} {conf:>8.3f} {match}")
-            if pred == true_label: correct += 1
-        except Exception as e:
-            print(f"  {os.path.basename(fp)[:36]:<40} ERR: {e}")
-
-    valid = len([f for f in targets if _parse_label(f)])
-    if valid > 0:
-        print(f"{'─'*68}")
-        print(f"Accuracy: {correct}/{valid} = {correct/valid:.4f}")
-
-
-# ══════════════════════════════════════════════════════════════
-# CLI
-# ══════════════════════════════════════════════════════════════
-
-def _parse_args():
-    p = argparse.ArgumentParser(
-        description="DFS-MLP: 전력 스펙트로그램 주파수 통계 특징 기반 보폭 분류",
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-    )
-    p.add_argument("--feat_dir",    default=DEFAULT_FEAT_DIR,   help="DFS feature NPZ dir")
-    p.add_argument("--sanit_dir",   default=DEFAULT_SANIT_DIR,  help="Sanitization NPZ dir")
-    # DFS 파라미터 (on-the-fly 시)
-    p.add_argument("--n_fft",       type=int,   default=64,    help="STFT FFT 크기 (기본: 64)")
-    p.add_argument("--hop",         type=int,   default=4,     help="STFT hop (기본: 4)")
-    p.add_argument("--doppler_hz",  type=float, default=50.0,  help="유효 도플러 대역 ±Hz (기본: 50)")
-    # PCA
-    p.add_argument("--n_pca",       type=int,   default=32,    help="PCA 주성분 수 (기본: 32)")
-    # MLP
-    p.add_argument("--hidden",      type=int, nargs="+", default=[256, 128, 64])
-    p.add_argument("--activation",  default="relu")
-    p.add_argument("--epochs",      type=int,   default=300)
-    p.add_argument("--lr",          type=float, default=1e-3)
-    # 저장
-    p.add_argument("--model_dir",   default=DEFAULT_MODEL_DIR)
-    p.add_argument("--result_dir",  default=DEFAULT_RESULT_DIR)
-    # 추론
-    p.add_argument("--inference",   action="store_true")
-    p.add_argument("--model_path",  default=None)
-    p.add_argument("--infer_file",  default=None)
-    return p.parse_args()
-
+        
+    run_inference_pytorch(args, "dfs", _ext, targets, use_pca=True)
 
 def main():
     args = _parse_args()
-    if args.inference:
+    if getattr(args, "inference", False):
         run_inference(args)
         return
 
@@ -461,9 +222,7 @@ def main():
     if len(X) == 0:
         print("[ERROR] No valid samples loaded."); sys.exit(1)
 
-    print(f"[Data] Loaded: X={X.shape}, labels={set(y)}")
     train_and_evaluate(X, y, subjects, args)
-
 
 if __name__ == "__main__":
     main()

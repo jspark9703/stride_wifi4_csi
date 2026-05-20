@@ -1,55 +1,119 @@
-# Baseline V2: Optimized Sliding Window Configuration
-# Experimental Baseline for 2.5s window logic
+# ============================================================
+# Baseline Configuration — stride_wifi4
+# 모든 파이프라인 파라미터의 기본값을 명시적으로 작성
+# --set 옵션으로 개별 값을 덮어쓸 수 있습니다.
+# ============================================================
+
 experiment:
   name: "baseline"
-  date_tag: ""                 # Full dataset discovery enabled
+  date_tag: ""                   # 특정 날짜 데이터만 사용 (빈 문자열 = 전체 날짜)
   steps:
     - preprocess
     - sanitize
     - extract
     - train
 
+# ────────────────────────────────────────────────────────────
+#  슬라이딩 윈도우 (Sliding Window)
+# ────────────────────────────────────────────────────────────
 sliding_window:
   enabled: true
-  window_sec: 2.5
-  hop_sec: 0.5
-  min_segment_size: 0.0   # 세그먼트 유효 최소 길이 [초] (0.0 = 비활성, 짧은 마지막 세그먼트 포함)
+  window_sec: 2.5                # 윈도우 크기 [초]
+  hop_sec: 0.5                   # 슬라이딩 hop 크기 [초]
+  min_segment_size: 0.0          # 유효 최소 세그먼트 길이 [초] (0.0 = 비활성)
+
 # ────────────────────────────────────────────────────────────
 #  전처리 (Preprocessing)
 # ────────────────────────────────────────────────────────────
 preprocessing:
-  target_fs: 100               # 목표 샘플링 주파수 [Hz]
-  max_gap_ms: 20.0             # 보간 기준 최대 갭 [ms]
+  target_fs: 100                 # 목표 샘플링 주파수 [Hz]
+  max_gap_ms: 20.0               # 보간 기준 최대 갭 [ms]
 
-  hampel_enabled: false         # Hampel 이상치 필터 (ablation 가능)
-  hampel_window: 7             # 필터 윈도우 크기 (홀수, 3~11)
-  hampel_threshold: 5.0        # 이상치 임계값 (1.0~10.0)
+  hampel_enabled: false          # Hampel 이상치 필터
+  hampel_window: 7               # 필터 윈도우 크기 (홀수, 3~11)
+  hampel_threshold: 5.0          # 이상치 임계값 (1.0~10.0)
 
-  lowpass_enabled: false       # Butterworth 저역통과 필터 (ablation 가능)
-  lowpass_cutoff: 11.0         # 차단 주파수 [Hz] (5.0~20.0)
+  lowpass_enabled: false         # Butterworth 저역통과 필터
+  lowpass_cutoff: 11.0           # 차단 주파수 [Hz] (5.0~20.0)
+
 # ────────────────────────────────────────────────────────────
 #  위상/진폭 보정 (Sanitization)
 # ────────────────────────────────────────────────────────────
 sanitization:
-  enable_ratio: false          # CSI Ratio 사용 (다중 안테나, ablation 가능)
-  make_template: false          # 캘리브레이션 CSV → template 자동 생성
+  enable_ratio: false            # CSI Ratio 사용 (다중 안테나)
+  make_template: false           # 캘리브레이션 CSV → template 자동 생성
   template_csv: "src/sanitization/template/template.csv"
   calib_dir: "calibration"
-  linear_start: 30             # 선형 부반송파 구간 시작 인덱스 (ablation 가능)
-  linear_end: 78               # 종료 인덱스 (exclusive)
-  hist_bins: 100               # 시각화용 히스토그램 빈
-  hist_range_max: 40           # 히스토그램 X축 최대값 [ms]
+  linear_start: 30               # 선형 부반송파 구간 시작 인덱스
+  linear_end: 78                 # 종료 인덱스 (exclusive)
+  hist_bins: 100                 # 시각화용 히스토그램 빈
+  hist_range_max: 40             # 히스토그램 X축 최대값 [ms]
 
+# ────────────────────────────────────────────────────────────
+#  특징 추출 (Feature Extraction)
+#  method: "dwt" | "dwt-seq" | "dfs" | "sdp" | "tddfs"
+# ────────────────────────────────────────────────────────────
 feature_extraction:
   method: "dwt"
-  dwt:
-    wavelet: "sym3"
-    level: 5
-    n_pca: 6
-    del_pca_1: false   # 첫 번째 PCA 주성분 제거 여부 (true = DC 성분 제거)
 
+  # ── DWT (Discrete Wavelet Transform) flat feature ──────────
+  dwt:
+    wavelet: "sym3"              # 웨이블릿 종류 (sym3, db4, haar, ...)
+    level: 8                     # 분해 레벨 (1~10)
+    n_pca: 6                     # PCA 주성분 수
+    del_pca_1: false             # 첫 번째 PCA 주성분 제거 (DC 성분 제거)
+
+  # ── DWT-Seq (Sequence 형태, LSTM/RNN 입력용) ───────────────
+  dwt-seq:
+    wavelet: "sym3"
+    level: 8
+    n_pca: 6
+    del_pca_1: false
+
+  # ── DFS (Doppler Frequency Spectrum) ───────────────────────
+  dfs:
+    n_fft: 64                    # FFT 크기
+    hop: 4                       # 스펙트로그램 hop 크기
+    doppler_hz: 50.0             # Doppler 주파수 범위 [Hz]
+
+  # ── SDP (Spatial Doppler Profile) ──────────────────────────
+  sdp:
+    n_lag: 20                    # ACF lag 수
+    wt: 100                      # 시간 윈도우 크기 (샘플 수)
+
+  # ── TD-DFS (Time-Domain DFS) ────────────────────────────────
+  tddfs:
+    delta_t_min: 1               # 시간 지연 탐색 최솟값 [샘플]
+    delta_t_max: 10              # 시간 지연 탐색 최댓값 [샘플]
+    fc_hz: 5180000000.0          # 중심 주파수 [Hz] (5.18 GHz)
+
+# ────────────────────────────────────────────────────────────
+#  학습 (Learning)
+#  model_type: "mlp" | "lstm" | "rnn"
+# ────────────────────────────────────────────────────────────
 learning:
-  hidden: [256, 128, 64]
-  activation: "relu"
-  epochs: 300
-  lr: 0.001
+  model_type: "mlp"              # 사용할 모델 종류
+
+  # ── 공통 ────────────────────────────────────────────────────
+  epochs: 300                    # 최대 학습 에폭
+  lr: 0.001                      # 학습률 (Adam)
+
+  # ── MLP 전용 ────────────────────────────────────────────────
+  hidden: [256, 128, 64]         # 은닉층 크기 목록
+  activation: "relu"             # 활성화 함수 (relu | tanh | logistic)
+  dfs_n_pca: 32                  # DFS-MLP 전용 PCA 주성분 수
+
+  # ── LSTM 전용 ───────────────────────────────────────────────
+  lstm_hidden: 128               # LSTM 은닉 유닛 수
+  lstm_layers: 2                 # LSTM 스택 레이어 수
+  lstm_dropout: 0.3              # LSTM 드롭아웃 비율
+
+  # ── RNN 전용 ────────────────────────────────────────────────
+  rnn_hidden: 128                # RNN 은닉 유닛 수
+  rnn_layers: 2                  # RNN 스택 레이어 수
+  rnn_dropout: 0.3               # RNN 드롭아웃 비율
+
+  # ── Focal Loss ──────────────────────────────────────────────
+  use_focal_loss: false          # Focal Loss 사용 여부 (false = CrossEntropy)
+  focal_gamma: 2.0               # 포커싱 파라미터 γ (0.0 = CE와 동일)
+  focal_alpha: [2.5, 1.0]        # 클래스 가중치 [big, small] (null = 균등)

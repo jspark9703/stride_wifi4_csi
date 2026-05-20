@@ -236,322 +236,42 @@ def load_dataset(args):
                                 args.delta_t_max, args.fc_hz)
 
 
-# ══════════════════════════════════════════════════════════════
-# B. MLP 파이프라인  (차원이 작으므로 PCA 없이 직접 MLP)
-# ══════════════════════════════════════════════════════════════
-
-def build_pipeline(hidden_layers: tuple, activation: str,
-                   max_iter: int, lr_init: float) -> Pipeline:
-    """
-    StandardScaler → MLPClassifier
-
-    TD-DFS 통계 벡터는 19-dim 으로 이미 저차원이므로
-    PCA 없이 StandardScaler + MLP 파이프라인 사용.
-    """
-    mlp = MLPClassifier(
-        hidden_layer_sizes=hidden_layers,
-        activation=activation,
-        solver="adam",
-        alpha=1e-3,             # DWT 보다 강한 L2 (작은 데이터셋 과적합 방지)
-        batch_size=32,
-        learning_rate="adaptive",
-        learning_rate_init=lr_init,
-        max_iter=max_iter,
-        random_state=42,
-        early_stopping=True,
-        validation_fraction=0.15,
-        n_iter_no_change=25,
-        verbose=False,
-    )
-    return Pipeline([
-        ("scaler", StandardScaler()),
-        ("mlp",    mlp),
-    ])
-
 
 # ══════════════════════════════════════════════════════════════
-# C. 학습 & 평가
+# PyTorch MLP Adapter
 # ══════════════════════════════════════════════════════════════
-
-FEAT_NAMES = [
-    "mean_v", "std_v", "median_v", "min_v", "max_v", "rms_v", "iqr_v",
-    "pos_ratio", "neg_ratio", "zero_cross",
-    "skewness", "kurtosis",
-    "low_energy", "high_energy", "peak_speed", "peak_fdop",
-    "diff_mean_abs", "diff_std", "diff_max_abs",
-]
-
-
-def _plot_confusion(cm, classes, ts, result_dir):
-    fig, ax = plt.subplots(figsize=(5, 4), facecolor=BG)
-    ax.set_facecolor(PANEL); ax.spines[:].set_color(GRID)
-    ax.tick_params(colors=TEXT)
-
-    im = ax.imshow(cm, cmap="Blues", vmin=0)
-    ax.set_xticks(range(len(classes))); ax.set_xticklabels(classes, color=TEXT)
-    ax.set_yticks(range(len(classes)))
-    ax.set_yticklabels(classes, color=TEXT, rotation=90, va="center")
-    ax.set_xlabel("Predicted", color=TEXT); ax.set_ylabel("True", color=TEXT)
-    ax.set_title("TD-DFS-MLP Confusion Matrix", color=TEXT, fontsize=12, pad=8)
-
-    cm_norm = cm.astype(float) / (cm.sum(axis=1, keepdims=True) + 1e-10)
-    for i in range(len(classes)):
-        for j in range(len(classes)):
-            tc = "white" if cm_norm[i, j] > 0.5 else TEXT
-            ax.text(j, i - 0.15, f"{cm_norm[i,j]*100:.1f}%",
-                    ha="center", va="center", fontsize=12, color=tc, fontweight="bold")
-            ax.text(j, i + 0.2,  f"({cm[i,j]})",
-                    ha="center", va="center", fontsize=9,  color=tc)
-
-    cbar = fig.colorbar(im, ax=ax, fraction=0.04, pad=0.02)
-    cbar.ax.tick_params(colors=TEXT, labelsize=8)
-    plt.tight_layout()
-
-    out = os.path.join(result_dir, f"tddfs_confusion_{ts}.png")
-    fig.savefig(out, dpi=150, bbox_inches="tight", facecolor=BG)
-    plt.close(fig)
-    print(f"[Result] Confusion matrix → {out}")
-
-
-def _plot_feature_importance(X, y, classes, ts, result_dir):
-    """클래스별 특징 평균 비교 막대그래프 (특징 중요도 대리 지표)."""
-    mask_big   = y == "big"
-    mask_small = y == "small"
-    mu_big     = X[mask_big].mean(axis=0)
-    mu_small   = X[mask_small].mean(axis=0)
-
-    # StandardScaler 없이 원시 평균 차이 (상대 크기 비교용)
-    diff = np.abs(mu_big - mu_small)
-    order = np.argsort(diff)[::-1]
-
-    fig, ax = plt.subplots(figsize=(14, 5), facecolor=BG)
-    ax.set_facecolor(PANEL); ax.spines[:].set_color(GRID)
-    ax.tick_params(colors=TEXT, labelsize=8)
-
-    x = np.arange(FEAT_DIM)
-    ax.bar(x - 0.2, mu_big[order],   0.35, color=C_BIG,   alpha=0.85, label="Big")
-    ax.bar(x + 0.2, mu_small[order], 0.35, color=C_SMALL, alpha=0.85, label="Small")
-
-    ax.set_xticks(x)
-    ax.set_xticklabels([FEAT_NAMES[i] for i in order],
-                       rotation=45, ha="right", fontsize=7)
-    ax.set_title("TD-DFS Feature Mean Comparison  ─  Big vs Small (sorted by |diff|)",
-                 color=TEXT, fontsize=11, pad=8)
-    ax.set_ylabel("Feature Mean Value", color=TEXT, fontsize=9)
-    ax.grid(axis="y", alpha=0.25)
-    ax.legend(facecolor=PANEL, edgecolor=GRID, labelcolor=TEXT, fontsize=9)
-
-    plt.tight_layout()
-    out = os.path.join(result_dir, f"tddfs_feature_importance_{ts}.png")
-    fig.savefig(out, dpi=150, bbox_inches="tight", facecolor=BG)
-    plt.close(fig)
-    print(f"[Result] Feature importance → {out}")
-
+import sys
+if os.path.join(BASE_DIR, "src", "learning", "mlp") not in sys.path:
+    sys.path.append(os.path.join(BASE_DIR, "src", "learning", "mlp"))
+from pytorch_mlp_utils import train_and_evaluate_pytorch, run_inference_pytorch
 
 def train_and_evaluate(X, y, subjects, args):
-    os.makedirs(args.model_dir,  exist_ok=True)
-    os.makedirs(args.result_dir, exist_ok=True)
+    feature_desc = f"Feature    : TD-DFS velocity time series → 19-dim statistical vector\n             Δt search [{args.delta_t_min}, {args.delta_t_max}]  fc={args.fc_hz/1e9:.3f}GHz"
+    meta_extras = {"delta_t_min": args.delta_t_min, "delta_t_max": args.delta_t_max, "fc_hz": args.fc_hz}
+    return train_and_evaluate_pytorch(X, y, subjects, args, "tddfs", feature_desc, meta_extras=meta_extras, use_pca=False)
 
-    le      = LabelEncoder()
-    y_enc   = le.fit_transform(y)
-    classes = le.classes_
-
-    print(f"\n[Train] Classes: {classes}  |  Total: {len(X)}  |  Feature dim: {X.shape[1]}")
-    for cls in classes:
-        print(f"  {cls}: {(y == cls).sum()} samples")
-    print(f"  Feature names: {FEAT_NAMES}")
-
-    # ── Hold-out 80/20
-    X_tr, X_te, y_tr, y_te = train_test_split(
-        X, y_enc, test_size=0.2, random_state=42, stratify=y_enc
-    )
-    print(f"\n[Train] Hold-out → Train={len(X_tr)}, Test={len(X_te)}")
-
-    pipe = build_pipeline(
-        hidden_layers=tuple(args.hidden),
-        activation=args.activation,
-        max_iter=args.epochs,
-        lr_init=args.lr,
-    )
-    pipe.fit(X_tr, y_tr)
-
-    y_pred = pipe.predict(X_te)
-    acc    = accuracy_score(y_te, y_pred)
-    report = classification_report(y_te, y_pred, target_names=classes)
-    cm     = confusion_matrix(y_te, y_pred)
-
-    print(f"\n[Result] Test Accuracy: {acc:.4f}")
-    print(report)
-
-    # ── 결과 저장
-    ts = datetime.now().strftime("%Y%m%d_%H%M%S")
-    report_path = os.path.join(args.result_dir, f"tddfs_mlp_report_{ts}.txt")
-    with open(report_path, "w", encoding="utf-8") as f:
-        f.write("TD-DFS-MLP Classification Report\n")
-        f.write(f"Timestamp  : {ts}\n")
-        f.write(f"Feature    : TD-DFS velocity time series → {FEAT_DIM}-dim statistical vector\n")
-        f.write(f"             Δt search [{args.delta_t_min}, {args.delta_t_max}]  fc={args.fc_hz/1e9:.3f}GHz\n")
-        f.write(f"Feature names: {FEAT_NAMES}\n")
-        f.write(f"Hidden     : {args.hidden}  Activation={args.activation}\n")
-        f.write(f"Epochs     : {args.epochs}  LR={args.lr}\n")
-        f.write(f"Train/Test : {len(X_tr)} / {len(X_te)}\n\n")
-        f.write(f"Test Accuracy: {acc:.4f}\n\n")
-        f.write(report)
-        f.write(f"\nConfusion Matrix:\n{cm}\n")
-    print(f"[Result] Report → {report_path}")
-
-    _plot_confusion(cm, classes, ts, args.result_dir)
-    _plot_feature_importance(X, y, classes, ts, args.result_dir)
-
-    # ── 5-Fold CV
-    print("\n[CV] 5-Fold Cross Validation...")
-    cv_accs = []
-    kf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
-    for fold, (tr_idx, val_idx) in enumerate(kf.split(X, y_enc)):
-        cv_pipe = build_pipeline(tuple(args.hidden), args.activation, args.epochs, args.lr)
-        cv_pipe.fit(X[tr_idx], y_enc[tr_idx])
-        fold_acc = accuracy_score(y_enc[val_idx], cv_pipe.predict(X[val_idx]))
-        cv_accs.append(fold_acc)
-        print(f"  Fold {fold+1}: {fold_acc:.4f}")
-    print(f"  CV Mean±Std: {np.mean(cv_accs):.4f} ± {np.std(cv_accs):.4f}")
-
-    with open(report_path, "a", encoding="utf-8") as f:
-        f.write(f"\n5-Fold CV: {[round(a,4) for a in cv_accs]}\n")
-        f.write(f"CV Mean: {np.mean(cv_accs):.4f}  CV Std: {np.std(cv_accs):.4f}\n")
-
-    # ── 모델 저장
-    model_path = os.path.join(args.model_dir, "tddfs_mlp.pkl")
-    le_path    = os.path.join(args.model_dir, "tddfs_label_encoder.pkl")
-    meta_path  = os.path.join(args.model_dir, "tddfs_mlp_meta.json")
-
-    with open(model_path, "wb") as f: pickle.dump(pipe, f)
-    with open(le_path,    "wb") as f: pickle.dump(le,   f)
-
-    meta = {
-        "feature_type":  "tddfs_stat",
-        "feat_dim":       FEAT_DIM,
-        "feat_names":     FEAT_NAMES,
-        "delta_t_min":    args.delta_t_min,
-        "delta_t_max":    args.delta_t_max,
-        "fc_hz":          args.fc_hz,
-        "hidden":         args.hidden,
-        "activation":     args.activation,
-        "classes":        list(classes),
-        "test_accuracy":  float(acc),
-        "cv_mean":        float(np.mean(cv_accs)),
-        "cv_std":         float(np.std(cv_accs)),
-        "timestamp":      ts,
-    }
-    with open(meta_path, "w", encoding="utf-8") as f:
-        json.dump(meta, f, indent=4, ensure_ascii=False)
-
-    print(f"[Model] Saved → {model_path}")
-    print(f"[Model] Meta  → {meta_path}")
-    return pipe, le
-
-
-# ══════════════════════════════════════════════════════════════
-# D. 추론
-# ══════════════════════════════════════════════════════════════
+def _ext(fp, args, meta):
+    _ext_path = os.path.join(BASE_DIR, "feature_extraction", "td-dfs")
+    if _ext_path not in sys.path: sys.path.insert(0, _ext_path)
+    from extract_tddfs import extract_features_single
+    res = extract_features_single(fp, delta_t_min=meta.get("delta_t_min", args.delta_t_min), delta_t_max=meta.get("delta_t_max", args.delta_t_max), fc_hz=meta.get("fc_hz", args.fc_hz))
+    return _velocity_to_stat_vector(res["velocity"], res.get("fdop"))
 
 def run_inference(args):
-    model_path = args.model_path or os.path.join(args.model_dir, "tddfs_mlp.pkl")
-    le_path    = os.path.join(args.model_dir, "tddfs_label_encoder.pkl")
-    meta_path  = os.path.join(args.model_dir, "tddfs_mlp_meta.json")
-
-    if not os.path.exists(model_path):
-        print(f"[ERROR] Model not found: {model_path}"); sys.exit(1)
-
-    with open(model_path, "rb") as f: pipe = pickle.load(f)
-    with open(le_path,    "rb") as f: le   = pickle.load(f)
-    with open(meta_path,  "r")  as f: meta = json.load(f)
-
-    delta_t_min = meta.get("delta_t_min", args.delta_t_min)
-    delta_t_max = meta.get("delta_t_max", args.delta_t_max)
-    fc_hz       = meta.get("fc_hz",        args.fc_hz)
-    classes     = meta.get("classes",       le.classes_.tolist())
-
-    _ext = os.path.join(BASE_DIR, "feature_extraction", "td-dfs")
-    if _ext not in sys.path: sys.path.insert(0, _ext)
-    from extract_tddfs import extract_features_single
-
+    import random
+    random.seed(42)
     targets = [args.infer_file] if args.infer_file else []
     if not targets:
-        import random; random.seed(42)
-        files   = sorted(glob.glob(os.path.join(args.feat_dir, "*.npz")))
+        files = sorted(glob.glob(os.path.join(args.feat_dir, "*.npz")))
         if not files:
             files = sorted(glob.glob(os.path.join(args.sanit_dir, "*.npz")))
         targets = random.sample(files, min(20, len(files)))
-
-    print(f"\n{'─'*68}")
-    print(f"{'File':<40} {'True':>6} {'Pred':>6} {'Conf':>8}")
-    print(f"{'─'*68}")
-
-    correct = 0
-    for fp in targets:
-        true_label = _parse_label(fp) or "?"
-        try:
-            fname   = os.path.basename(fp)
-            feat_fp = os.path.join(args.feat_dir, fname)
-            if os.path.exists(feat_fp):
-                d    = np.load(feat_fp, allow_pickle=True)
-                feat = _velocity_to_stat_vector(
-                    d["velocity"].astype(np.float32),
-                    d["fdop"].astype(np.float32) if "fdop" in d else None,
-                )
-            else:
-                res  = extract_features_single(fp, delta_t_min=delta_t_min,
-                                               delta_t_max=delta_t_max, fc_hz=fc_hz)
-                feat = _velocity_to_stat_vector(res["velocity"], res["fdop"])
-
-            prob  = pipe.predict_proba(feat.reshape(1, -1))[0]
-            pred  = le.inverse_transform([prob.argmax()])[0]
-            conf  = prob.max()
-            match = "✓" if pred == true_label else "✗"
-            print(f"  {fname[:36]:<40} {true_label:>6} {pred:>6} {conf:>8.3f} {match}")
-            if pred == true_label: correct += 1
-        except Exception as e:
-            print(f"  {os.path.basename(fp)[:36]:<40} ERR: {e}")
-
-    valid = len([f for f in targets if _parse_label(f)])
-    if valid > 0:
-        print(f"{'─'*68}")
-        print(f"Accuracy: {correct}/{valid} = {correct/valid:.4f}")
-
-
-# ══════════════════════════════════════════════════════════════
-# CLI
-# ══════════════════════════════════════════════════════════════
-
-def _parse_args():
-    p = argparse.ArgumentParser(
-        description="TD-DFS-MLP: 순간 도플러 속도 통계 특징 기반 보폭 분류",
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-    )
-    p.add_argument("--feat_dir",     default=DEFAULT_FEAT_DIR,   help="TD-DFS feature NPZ dir")
-    p.add_argument("--sanit_dir",    default=DEFAULT_SANIT_DIR,  help="Sanitization NPZ dir")
-    # TD-DFS 파라미터 (on-the-fly 시)
-    p.add_argument("--delta_t_min",  type=int,   default=1,       help="Δt 탐색 최솟값 (기본: 1)")
-    p.add_argument("--delta_t_max",  type=int,   default=10,      help="Δt 탐색 최댓값 (기본: 10)")
-    p.add_argument("--fc_hz",        type=float, default=5.18e9,  help="WiFi 중심 주파수 Hz (기본: 5.18e9)")
-    # MLP
-    p.add_argument("--hidden",       type=int, nargs="+", default=[128, 64, 32])
-    p.add_argument("--activation",   default="relu")
-    p.add_argument("--epochs",       type=int,   default=300)
-    p.add_argument("--lr",           type=float, default=1e-3)
-    # 저장
-    p.add_argument("--model_dir",    default=DEFAULT_MODEL_DIR)
-    p.add_argument("--result_dir",   default=DEFAULT_RESULT_DIR)
-    # 추론
-    p.add_argument("--inference",    action="store_true")
-    p.add_argument("--model_path",   default=None)
-    p.add_argument("--infer_file",   default=None)
-    return p.parse_args()
-
+        
+    run_inference_pytorch(args, "tddfs", _ext, targets, use_pca=False)
 
 def main():
     args = _parse_args()
-    if args.inference:
+    if getattr(args, "inference", False):
         run_inference(args)
         return
 
@@ -559,9 +279,7 @@ def main():
     if len(X) == 0:
         print("[ERROR] No valid samples loaded."); sys.exit(1)
 
-    print(f"[Data] Loaded: X={X.shape}, labels={set(y)}")
     train_and_evaluate(X, y, subjects, args)
-
 
 if __name__ == "__main__":
     main()

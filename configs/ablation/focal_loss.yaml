@@ -1,0 +1,25 @@
+sweep_name: "focal_loss"
+base_config: "configs/baseline.yaml"
+
+sweeps:
+  - name: "ce_baseline"
+    overrides:
+      learning.use_focal_loss: false
+
+  - name: "focal_g2_alpha_default"
+    overrides:
+      learning.use_focal_loss: true
+      learning.focal_gamma: 2.0
+      learning.focal_alpha: [2.5, 1.0]
+
+  - name: "focal_g3_alpha_default"
+    overrides:
+      learning.use_focal_loss: true
+      learning.focal_gamma: 3.0
+      learning.focal_alpha: [2.5, 1.0]
+
+  - name: "focal_g2_unweighted"
+    overrides:
+      learning.use_focal_loss: true
+      learning.focal_gamma: 2.0
+      learning.focal_alpha: null

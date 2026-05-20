@@ -319,6 +319,19 @@ def _step_extract(cfg: dict, dirs: dict) -> None:
             del_pca_1 = mcfg.get("del_pca_1", False),
         )
 
+    elif method == "dwt-seq":
+        _add_path(os.path.join(BASE_DIR, "src", "feature_extraction", "dwt-seq"))
+        import extract_dwt_seq
+        extract_dwt_seq.run_seq_extraction(
+            sanit_dir = dirs["feat_input"],
+            out_dir   = dirs["feat"],
+            log_dir   = dirs["res_feat"],
+            wavelet   = mcfg.get("wavelet",   "sym3"),
+            level     = mcfg.get("level",     10),
+            n_pca     = mcfg.get("n_pca",     6),
+            del_pca_1 = mcfg.get("del_pca_1", False),
+        )
+
     else:
         raise ValueError(f"Unknown method: {method}")
 
@@ -345,8 +358,17 @@ def _step_train(cfg: dict, dirs: dict) -> dict:
         sanit_dir  = dirs["feat_input"],
         hidden     = lcfg.get("hidden",     [256, 128, 64]),
         activation = lcfg.get("activation", "relu"),
-        epochs     = lcfg.get("epochs",      300),
-        lr         = lcfg.get("lr",          1e-3),
+        epochs       = lcfg.get("epochs",      300),
+        lr           = lcfg.get("lr",          1e-3),
+        lstm_hidden  = lcfg.get("lstm_hidden", 128),
+        lstm_layers  = lcfg.get("lstm_layers", 2),
+        lstm_dropout = lcfg.get("lstm_dropout", 0.3),
+        rnn_hidden   = lcfg.get("rnn_hidden", 128),
+        rnn_layers   = lcfg.get("rnn_layers", 2),
+        rnn_dropout  = lcfg.get("rnn_dropout", 0.3),
+        use_focal_loss = lcfg.get("use_focal_loss", False),
+        focal_gamma    = lcfg.get("focal_gamma", 2.0),
+        focal_alpha    = lcfg.get("focal_alpha", [2.5, 1.0]),
         model_dir  = dirs["models"],
         result_dir = dirs["res_learn"],
         inference  = False,
@@ -358,14 +380,32 @@ def _step_train(cfg: dict, dirs: dict) -> dict:
     )
 
     if method == "dwt":
-        import dwt_mlp as trainer
+        model_type = lcfg.get("model_type", "mlp")
         args.wavelet = mcfg.get("wavelet", "sym3")
         args.level   = mcfg.get("level",   10)
         args.n_pca   = mcfg.get("n_pca",   6)
-        X, y, subjects = trainer.load_dataset(
-            args.feat_dir, args.sanit_dir,
-            args.wavelet, args.level, args.n_pca,
-        )
+
+        if model_type == "mlp":
+            import dwt_mlp as trainer
+            X, y, subjects = trainer.load_dataset(
+                args.feat_dir, args.sanit_dir,
+                args.wavelet, args.level, args.n_pca,
+            )
+        elif model_type == "lstm":
+            _add_path(os.path.join(BASE_DIR, "src", "learning", "lstm"))
+            import dwt_lstm as trainer
+            X, y, subjects, lengths = trainer.load_from_feature_npz(
+                args.feat_dir, args.level, args.n_pca,
+            )
+            args.seq_lengths = lengths
+        elif model_type == "rnn":
+            _add_path(os.path.join(BASE_DIR, "src", "learning", "rnn"))
+            import dwt_rnn as trainer
+            X, y, subjects = trainer.load_from_feature_npz(
+                args.feat_dir, args.level, args.n_pca,
+            )
+        else:
+            raise ValueError(f"Unknown model_type for dwt method: {model_type}")
 
     elif method == "dfs":
         import dfs_mlp as trainer
@@ -391,6 +431,25 @@ def _step_train(cfg: dict, dirs: dict) -> dict:
         args.fc_hz       = mcfg.get("fc_hz",       5.18e9)
         X, y, subjects   = trainer.load_dataset(args)
 
+    elif method == "dwt-seq":
+        model_type = lcfg.get("model_type", "lstm")
+        args.wavelet = mcfg.get("wavelet", "sym3")
+        args.level   = mcfg.get("level",   10)
+        args.n_pca   = mcfg.get("n_pca",   6)
+
+        if model_type == "lstm":
+            _add_path(os.path.join(BASE_DIR, "src", "learning", "lstm"))
+            import dwt_seq_lstm as trainer
+        elif model_type == "rnn":
+            _add_path(os.path.join(BASE_DIR, "src", "learning", "rnn"))
+            import dwt_seq_rnn as trainer
+        else:
+            raise ValueError(f"Unknown model_type for dwt-seq method: {model_type}")
+
+        X, y, subjects, max_seq_len, seq_lens = trainer.load_from_feature_npz(args.feat_dir)
+        args.max_seq_len = max_seq_len
+        args.seq_lens    = seq_lens
+
     elif method == "seq":
         model_type = lcfg.get("model_type", "lstm")
         _add_path(os.path.join(BASE_DIR, "src", "learning", "seq"))
@@ -408,13 +467,21 @@ def _step_train(cfg: dict, dirs: dict) -> dict:
     if len(X) == 0:
         raise RuntimeError(f"[Train] No valid samples from {args.feat_dir}")
 
-    print(f"[Train] Loaded {len(X)} samples  feat_dim={X.shape[1]}")
+    feat_shape_str = "×".join(str(d) for d in X.shape[1:])
+    print(f"[Train] Loaded {len(X)} samples  feat_shape={feat_shape_str}")
     trainer.train_and_evaluate(X, y, subjects, args)
 
     # 저장된 meta JSON에서 지표 읽기
-    if method == "seq":
+    if method in ("seq",):
         model_type = lcfg.get("model_type", "lstm")
         meta_path = os.path.join(dirs["models"], f"seq_{model_type}_meta.json")
+    elif method == "dwt":
+        model_type = lcfg.get("model_type", "mlp")
+        suffix = "mlp" if model_type == "mlp" else model_type
+        meta_path = os.path.join(dirs["models"], f"dwt_{suffix}_meta.json")
+    elif method == "dwt-seq":
+        model_type = lcfg.get("model_type", "lstm")
+        meta_path = os.path.join(dirs["models"], f"dwt_seq_{model_type}_meta.json")
     else:
         meta_path = os.path.join(dirs["models"], f"{method}_mlp_meta.json")
         

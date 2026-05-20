@@ -58,6 +58,17 @@ python main.py --config configs/baseline.yaml \
 # 특징 추출 방법 변경
 python main.py --config configs/baseline.yaml --set feature_extraction.method=dfs
 
+# 시계열(DWT-seq) 및 LSTM / RNN 모델 지정
+python main.py --config configs/baseline.yaml \
+  --set feature_extraction.method=dwt-seq \
+  --set learning.model_type=lstm \
+  --set learning.lstm_hidden=128
+
+python main.py --config configs/baseline.yaml \
+  --set feature_extraction.method=dwt-seq \
+  --set learning.model_type=rnn \
+  --set learning.rnn_hidden=64
+
 # DWT 레벨 변경
 python main.py --config configs/baseline.yaml --set feature_extraction.dwt.level=8
 
@@ -157,7 +168,7 @@ python main.py --config configs/baseline.yaml \
 
 | 파라미터 | YAML 키 | 기본값 | 선택지 |
 |---|---|---|---|
-| 추출 방법 | `feature_extraction.method` | `"dwt"` | `dwt \| dfs \| sdp \| tddfs` |
+| 추출 방법 | `feature_extraction.method` | `"dwt"` | `dwt \| dfs \| sdp \| tddfs \| seq \| dwt-seq` |
 
 #### DWT (Discrete Wavelet Transform)
 
@@ -166,6 +177,14 @@ python main.py --config configs/baseline.yaml \
 | 웨이블릿 함수 | `feature_extraction.dwt.wavelet` | `"sym3"` | `db2, db4, sym3, coif1, haar` |
 | 분해 레벨 | `feature_extraction.dwt.level` | `10` | `[5, 7, 8, 10, 12, 15]` |
 | PCA 주성분 수 | `feature_extraction.dwt.n_pca` | `6` | `[3, 6, 10, 15, 20]` |
+
+#### DWT-seq / Seq (노이즈 제거된 시계열 기반)
+
+| 파라미터 | YAML 키 | 기본값 | 권장 범위 |
+|---|---|---|---|
+| 웨이블릿 함수 | `feature_extraction.dwt-seq.wavelet` | `"sym3"` | `db2, db4, sym3, coif1, haar` |
+| 분해 레벨 | `feature_extraction.dwt-seq.level` | `10` | `[5, 7, 8, 10, 12, 15]` |
+| PCA 주성분 수 | `feature_extraction.dwt-seq.n_pca` | `6` | `[3, 6, 10, 15, 20]` |
 
 #### DFS (Doppler Frequency Spectrum, STFT 기반)
 
@@ -206,8 +225,15 @@ python main.py --config configs/baseline.yaml \
 
 | 파라미터 | YAML 키 | 기본값 | 권장 범위 |
 |---|---|---|---|
-| 은닉층 구조 | `learning.hidden` | `[256,128,64]` | `[128,64]`, `[256,128,64]`, `[512,256,128]` |
-| 활성화 함수 | `learning.activation` | `"relu"` | `relu \| tanh \| logistic` |
+| 모델 종류 | `learning.model_type` | `"mlp"` | `mlp \| lstm \| rnn` |
+| 은닉층 구조 (MLP) | `learning.hidden` | `[256,128,64]` | `[128,64]`, `[256,128,64]`, `[512,256,128]` |
+| 활성화 함수 (MLP) | `learning.activation` | `"relu"` | `relu \| tanh \| logistic` |
+| 은닉 유닛 (LSTM) | `learning.lstm_hidden` | `128` | `[64, 128, 256]` |
+| 레이어 수 (LSTM) | `learning.lstm_layers` | `2` | `[1, 2, 3]` |
+| 드롭아웃 (LSTM) | `learning.lstm_dropout` | `0.3` | `[0.0, 0.3, 0.5]` |
+| 은닉 유닛 (RNN) | `learning.rnn_hidden` | `128` | `[64, 128, 256]` |
+| 레이어 수 (RNN) | `learning.rnn_layers` | `2` | `[1, 2, 3]` |
+| 드롭아웃 (RNN) | `learning.rnn_dropout` | `0.3` | `[0.0, 0.3, 0.5]` |
 | 최대 에폭 | `learning.epochs` | `300` | `[100, 200, 300, 500]` |
 | 초기 학습률 | `learning.lr` | `0.001` | `[0.0001, 0.001, 0.01]` |
 

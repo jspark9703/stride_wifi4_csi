@@ -5,7 +5,11 @@
       "Bash(mkdir -p \"c:/Users/jspar/Desktop/SCHOOL/idealab/WIFI_CSI/project_csi/demo/stride_wifi4/configs/ablation\")",
       "Bash(git mv *)",
       "Bash(python main.py --config configs/default.yaml --set sliding_window.enabled=true --set sliding_window.window_sec=1.0 --set sliding_window.hop_sec=0.5 --steps extract train)",
-      "Bash(echo \"exit: $?\")"
+      "Bash(echo \"exit: $?\")",
+      "Bash(conda run -n wifisense python -c ' *)",
+      "PowerShell(conda activate wifisense)",
+      "PowerShell(python --version)",
+      "Bash(xargs -I{} python -c \"import numpy as np; d=np.load\\('{}', allow_pickle=True\\); print\\(list\\(d.keys\\(\\)\\), {k: d[k].shape if hasattr\\(d[k], 'shape'\\) else d[k] for k in d.files}\\)\")"
     ]
   }
 }
