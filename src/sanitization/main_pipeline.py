@@ -47,6 +47,7 @@ async def run_all(args, dirs):
         calib_dir=calib_dir,
         out_path=os.path.abspath(os.path.join(os.path.dirname(__file__), "..", args.template_csv)),
         linear_interval=linear_interval,
+        protocol=args.protocol,
         plot=True
     )
 
@@ -60,6 +61,7 @@ async def run_all(args, dirs):
         raw_dir=dirs["raw_dir"],
         out_dir=dirs["prep_dir"],
         json_dir=dirs["json_dir"],
+        protocol=args.protocol,
         run_id=run_id
     )
     
@@ -104,6 +106,7 @@ if __name__ == "__main__":
                         help="Enable Hampel outlier filter (default: enabled). Use --no-hampel_enabled to disable.")
     parser.add_argument("--lowpass_enabled", action=argparse.BooleanOptionalAction, default=False,
                         help="Enable Butterworth low-pass filter (default: disabled). Use --lowpass_enabled to enable.")
+    parser.add_argument("--protocol", type=str, default="wifi4", choices=["wifi4", "wifi6"], help="WiFi protocol (wifi4 or wifi6)")
     
     # Sanitization / Calibration Parameters
     parser.add_argument("--enable_ratio", action="store_true", help="Enable CSI Ratio (for multiple antennas)")

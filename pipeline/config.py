@@ -63,7 +63,7 @@ def validate_config(cfg: dict) -> None:
             raise ValueError(f"Config missing required key: '{key}'")
 
     method = cfg["feature_extraction"].get("method", "")
-    valid = ["dwt", "dfs", "sdp", "tddfs", "seq", "dwt-seq"]
+    valid = ["dwt", "dfs", "sdp", "tddfs", "dwt-seq"]
     if method not in valid:
         raise ValueError(f"Unknown feature method '{method}'. Choose from {valid}")
 

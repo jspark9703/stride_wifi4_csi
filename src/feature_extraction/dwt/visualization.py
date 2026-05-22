@@ -92,11 +92,11 @@ def load_features(npz_path, wavelet=WAVELET, level=LEVEL, n_pca=N_PCA):
     """sanitization NPZ → (feature_vec, pca_streams, raw_amplitude)"""
     data      = np.load(npz_path)
     csi       = data["csi"]
-    amplitude = np.abs(csi).astype(np.float32)          # (N, 108)
+    amplitude = np.abs(csi).astype(np.float32)          # (N, shape[1])
 
     min_len = 2 ** (level + 1)
-    if amplitude.shape[0] < min_len:
-        pad = np.zeros((min_len - amplitude.shape[0], 108), dtype=np.float32)
+    if len(amplitude) < min_len:
+        pad = np.zeros((min_len - amplitude.shape[0], amplitude.shape[1]), dtype=np.float32)
         amplitude = np.vstack([amplitude, pad])
 
     k = min(n_pca, amplitude.shape[0])

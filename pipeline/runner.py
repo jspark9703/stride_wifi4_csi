@@ -170,13 +170,14 @@ async def _step_preprocess(cfg: dict, dirs: dict) -> None:
         json_dir         = dirs["json"],
         target_fs        = pcfg.get("target_fs",        100),
         max_gap_ms       = pcfg.get("max_gap_ms",        20.0),
-        hampel_enabled   = pcfg.get("hampel_enabled",   True),
+        hampel_enabled   = pcfg.get("hampel_enabled",   False),
         hampel_window    = pcfg.get("hampel_window",    7),
         hampel_threshold = pcfg.get("hampel_threshold", 5.0),
         lowpass_enabled  = pcfg.get("lowpass_enabled",  False),
         lowpass_cutoff   = pcfg.get("lowpass_cutoff",   11.0),
         window_sec       = 0,   # windowing 은 window 스텝에서 완료
         hop_sec          = 0,
+        protocol         = pcfg.get("protocol", "wifi4"),
         run_id           = cfg["experiment"].get("run_id"),
     )
 
@@ -205,6 +206,7 @@ async def _step_sanitize(cfg: dict, dirs: dict) -> None:
                     scfg.get("linear_start", 30),
                     scfg.get("linear_end",   78),
                 ),
+                protocol = cfg.get("preprocessing", {}).get("protocol", "wifi4"),
                 plot = True,
             )
 
@@ -305,18 +307,6 @@ def _step_extract(cfg: dict, dirs: dict) -> None:
             delta_t_min = mcfg.get("delta_t_min", 1),
             delta_t_max = mcfg.get("delta_t_max", 10),
             fc_hz       = mcfg.get("fc_hz",       5.18e9),
-        )
-    elif method == "seq":
-        _add_path(os.path.join(BASE_DIR, "src", "feature_extraction", "seq"))
-        import extract_seq
-        extract_seq.run_seq_extraction(
-            sanit_dir = dirs["feat_input"],
-            out_dir   = dirs["feat"],
-            log_dir   = dirs["res_feat"],
-            wavelet   = mcfg.get("wavelet",   "sym3"),
-            level     = mcfg.get("level",     10),
-            n_pca     = mcfg.get("n_pca",     6),
-            del_pca_1 = mcfg.get("del_pca_1", False),
         )
 
     elif method == "dwt-seq":
@@ -450,16 +440,6 @@ def _step_train(cfg: dict, dirs: dict) -> dict:
         args.max_seq_len = max_seq_len
         args.seq_lens    = seq_lens
 
-    elif method == "seq":
-        model_type = lcfg.get("model_type", "lstm")
-        _add_path(os.path.join(BASE_DIR, "src", "learning", "seq"))
-        if model_type == "lstm":
-            import seq_lstm as trainer
-        elif model_type == "rnn":
-            import seq_rnn as trainer
-        else:
-            raise ValueError(f"Unknown model_type for seq method: {model_type}")
-        X, y, subjects = trainer.load_from_feature_npz(args.feat_dir)
 
     else:
         raise ValueError(f"Unknown method: {method}")
@@ -472,10 +452,7 @@ def _step_train(cfg: dict, dirs: dict) -> dict:
     trainer.train_and_evaluate(X, y, subjects, args)
 
     # 저장된 meta JSON에서 지표 읽기
-    if method in ("seq",):
-        model_type = lcfg.get("model_type", "lstm")
-        meta_path = os.path.join(dirs["models"], f"seq_{model_type}_meta.json")
-    elif method == "dwt":
+    if method == "dwt":
         model_type = lcfg.get("model_type", "mlp")
         suffix = "mlp" if model_type == "mlp" else model_type
         meta_path = os.path.join(dirs["models"], f"dwt_{suffix}_meta.json")

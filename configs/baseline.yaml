@@ -26,6 +26,7 @@ sliding_window:
 #  전처리 (Preprocessing)
 # ────────────────────────────────────────────────────────────
 preprocessing:
+  protocol: "wifi4"              # wifi4 | wifi6
   target_fs: 100                 # 목표 샘플링 주파수 [Hz]
   max_gap_ms: 20.0               # 보간 기준 최대 갭 [ms]
 

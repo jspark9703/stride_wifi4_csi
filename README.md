@@ -80,6 +80,11 @@ python main.py --config configs/baseline.yaml \
   --set preprocessing.hampel_enabled=true \
   --set preprocessing.hampel_window=5 \
   --steps preprocess sanitize extract train
+
+# Wi-Fi 6 프로토콜로 변경 (2.4GHz / 5GHz 데이터 자동 대응)
+python main.py --config configs/baseline.yaml \
+  --set preprocessing.protocol=wifi6 \
+  --steps preprocess sanitize extract train
 ```
 
 > **KEY 형식**: YAML dot-path 표기 (예: `feature_extraction.dwt.n_pca=10`)  
@@ -124,6 +129,7 @@ python main.py --config configs/baseline.yaml --set sliding_window.window_sec=1.
 
 | 파라미터 | YAML 키 | 기본값 | 권장 범위 |
 |---|---|---|---|
+| WiFi 프로토콜 | `preprocessing.protocol` | `"wifi4"` | `wifi4 \| wifi6` (Wi-Fi 6 2.4/5GHz 자동지원) |
 | 목표 샘플링 주파수 | `preprocessing.target_fs` | `100` | `[50, 100]` |
 | 보간 갭 기준 [ms] | `preprocessing.max_gap_ms` | `20.0` | `[10.0, 20.0, 50.0]` |
 | Hampel 필터 활성화 | `preprocessing.hampel_enabled` | `false` | `[true, false]` |

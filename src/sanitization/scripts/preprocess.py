@@ -47,6 +47,7 @@ class TimeSeriesPreprocessor:
         hampel_threshold=HAMPEL_THRESHOLD,
         lowpass_enabled=LOWPASS_ENABLED,
         lowpass_cutoff=LOWPASS_CUTOFF,
+        protocol="wifi4",
     ):
         self.target_fs        = target_fs
         self.max_gap_ms       = max_gap_ms
@@ -55,25 +56,36 @@ class TimeSeriesPreprocessor:
         self.hampel_threshold = hampel_threshold
         self.lowpass_enabled  = lowpass_enabled
         self.lowpass_cutoff   = lowpass_cutoff
-        # 802.11n 40MHz 유효 부반송파 (가드밴드 제외: 2~58, 70~126 = 114개)
-        nz = list(range(2, 59)) + list(range(70, 127))
-        # 파일럿 부반송파 위치 (11, 25, 53, -53(75), -25(103), -11(117))
-        pilots = [11, 25, 53, 75, 103, 117]
-        # 최종 108개 유효 데이터 부반송파 선별
-        self.valid_indices = [x for x in nz if x not in pilots]
+        self.protocol         = protocol
+
+        if self.protocol == "wifi4":
+            # 802.11n 40MHz 유효 부반송파 (가드밴드 제외: 2~58, 70~126 = 114개)
+            nz = list(range(2, 59)) + list(range(70, 127))
+            # 파일럿 부반송파 위치 (11, 25, 53, -53(75), -25(103), -11(117))
+            pilots = [11, 25, 53, 75, 103, 117]
+            # 최종 108개 유효 데이터 부반송파 선별
+            self.valid_indices = [x for x in nz if x not in pilots]
+        else:
+            self.valid_indices = None
 
     def parse_csi_string(self, csi_str):
         # json_loads 대신 성능 최적화: ast.literal_eval 유지하지만 dtype float32
         csi_list = ast.literal_eval(csi_str)
         csi_array = np.array(csi_list, dtype=np.float32)
         
-        if len(csi_array) != 384:
-            raise ValueError(f"Expected 384, but got {len(csi_array)}")
+        if self.protocol == "wifi4":
+            if len(csi_array) != 384:
+                raise ValueError(f"Expected 384, but got {len(csi_array)}")
+            ht_ltf_flat = csi_array[128:]
+            complex_ht_ltf = ht_ltf_flat[::2] + 1j * ht_ltf_flat[1::2]
+            return complex_ht_ltf[self.valid_indices]
+        
+        elif self.protocol in ["wifi6", "wifi6_2.4g", "wifi6_5g"]:
+            complex_csi = csi_array[::2] + 1j * csi_array[1::2]
+            return complex_csi
             
-        ht_ltf_flat = csi_array[128:]
-        complex_ht_ltf = ht_ltf_flat[::2] + 1j * ht_ltf_flat[1::2]
-        valid_ht_ltf = complex_ht_ltf[self.valid_indices]
-        return valid_ht_ltf
+        else:
+            raise ValueError(f"Unknown protocol: {self.protocol}")
         
     def process_dataframe(self, df):
         csi_matrix = np.array([self.parse_csi_string(s) for s in df['data']])
@@ -258,6 +270,7 @@ def process_single_csv(
     hampel_threshold,
     lowpass_enabled,
     lowpass_cutoff,
+    protocol="wifi4",
     window_sec=0,
     hop_sec=0,
 ):
@@ -270,6 +283,7 @@ def process_single_csv(
         hampel_threshold=hampel_threshold,
         lowpass_enabled=lowpass_enabled,
         lowpass_cutoff=lowpass_cutoff,
+        protocol=protocol,
     )
 
     try:
@@ -332,6 +346,7 @@ async def run_preprocessing(
     hampel_threshold=HAMPEL_THRESHOLD,
     lowpass_enabled=LOWPASS_ENABLED,
     lowpass_cutoff=LOWPASS_CUTOFF,
+    protocol="wifi4",
     window_sec=0,
     hop_sec=0,
     run_id=None,
@@ -373,6 +388,7 @@ async def run_preprocessing(
             hampel_threshold=hampel_threshold,
             lowpass_enabled=lowpass_enabled,
             lowpass_cutoff=lowpass_cutoff,
+            protocol=protocol,
             window_sec=window_sec,
             hop_sec=hop_sec,
         )

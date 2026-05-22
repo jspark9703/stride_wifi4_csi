@@ -35,16 +35,30 @@ _PILOTS = [11, 25, 53, 75, 103, 117]
 VALID_INDICES = [x for x in _NZ if x not in _PILOTS]  # 108개
 
 
-def extract_valid_108(csi_str: str) -> np.ndarray:
+def extract_valid_subcarriers(csi_str: str, protocol: str = "wifi4") -> np.ndarray:
     """
-    CSV의 'data' 컬럼 문자열에서 108개의 유효 복소 CSI 서브캐리어를 추출합니다.
+    CSV의 'data' 컬럼 문자열에서 유효 복소 CSI 서브캐리어를 추출합니다.
     """
     csi_array = np.array(ast.literal_eval(csi_str), dtype=np.float32)
-    if len(csi_array) != 384:
-        raise ValueError(f"Expected 384 elements, got {len(csi_array)}")
-    ht_ltf_flat = csi_array[128:]
-    complex_ht_ltf = ht_ltf_flat[::2] + 1j * ht_ltf_flat[1::2]
-    return complex_ht_ltf[VALID_INDICES]
+    
+    if protocol == "wifi4":
+        if len(csi_array) != 384:
+            raise ValueError(f"Expected 384 elements, got {len(csi_array)}")
+        ht_ltf_flat = csi_array[128:]
+        complex_ht_ltf = ht_ltf_flat[::2] + 1j * ht_ltf_flat[1::2]
+        return complex_ht_ltf[VALID_INDICES]
+        
+    elif protocol in ["wifi6", "wifi6_2.4g", "wifi6_5g"]:
+        complex_csi = csi_array[::2] + 1j * csi_array[1::2]
+        # remove the DC subcarrier explicitly if we know it's always exactly zero amplitude
+        # or leave it. Wait, the system drops zero columns. So we can just return it.
+        # But make_template calculates phase etc. We MUST drop DC here otherwise it breaks linear fitting.
+        # Actually, let's just drop exact 0+0j elements to be safe for wifi6.
+        complex_csi = complex_csi[complex_csi != 0j]
+        return complex_csi
+        
+    else:
+        raise ValueError(f"Unknown protocol: {protocol}")
 
 
 def set_template(csi_calib: np.ndarray, linear_interval: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
@@ -98,7 +112,7 @@ def set_template(csi_calib: np.ndarray, linear_interval: np.ndarray) -> tuple[np
     return csi_amp_template, csi_phase_template
 
 
-def run_make_template(calib_dir: str, out_path: str, linear_interval: np.ndarray, plot: bool = True):
+def run_make_template(calib_dir: str, out_path: str, linear_interval: np.ndarray, protocol: str = "wifi4", plot: bool = True):
     """
     calib_dir 안의 모든 캘리브레이션 CSV 파일을 읽어 템플릿을 생성하고 저장합니다.
 
@@ -123,7 +137,7 @@ def run_make_template(calib_dir: str, out_path: str, linear_interval: np.ndarray
             continue
         for csi_str in df['data']:
             try:
-                all_csi.append(extract_valid_108(csi_str))
+                all_csi.append(extract_valid_subcarriers(csi_str, protocol=protocol))
             except Exception as e:
                 pass  # noisy packet, skip silently
 
@@ -199,6 +213,10 @@ if __name__ == "__main__":
         "--no_plot", action="store_true",
         help="Disable diagnostic preview plot generation"
     )
+    parser.add_argument(
+        "--protocol", type=str, default="wifi4",
+        help="WiFi protocol (wifi4 or wifi6)"
+    )
     args = parser.parse_args()
 
     linear_interval = np.arange(args.linear_start, args.linear_end)
@@ -207,5 +225,6 @@ if __name__ == "__main__":
         calib_dir=args.calib_dir,
         out_path=args.out_path,
         linear_interval=linear_interval,
+        protocol=args.protocol,
         plot=not args.no_plot
     )
