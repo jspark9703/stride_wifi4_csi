@@ -23,6 +23,8 @@
 
 import os
 import glob
+import argparse
+import warnings
 import numpy as np
 import matplotlib.pyplot as plt
 import pywt
@@ -35,6 +37,12 @@ plt.rcParams['axes.unicode_minus'] = False
 plt.rcParams['figure.figsize'] = (10, 5)
 plt.rcParams['axes.grid'] = True
 
+# ──────────────────────────────────────────
+# 경고 필터링
+# ──────────────────────────────────────────
+warnings.filterwarnings('ignore', message='.*Mean of empty slice.*')
+warnings.filterwarnings('ignore', category=RuntimeWarning)
+
 # =============================================================================
 # 설정
 # =============================================================================
@@ -45,21 +53,24 @@ SANIT_ROOT = os.path.join(PROJECT_ROOT, 'data', 'sanitization', 'sanitization')
 # 결과 저장 경로: feature_extraction/result/dwt/yyyymmdd/
 TODAY = datetime.now().strftime('%Y%m%d')
 RESULT_DIR = os.path.join(PROJECT_ROOT, 'feature_extraction', 'result', 'dwt', TODAY)
-os.makedirs(RESULT_DIR, exist_ok=True)
 
 # DWT 파라미터
 WAVELET = 'sym3'
 LEVEL = 10
 N_COMPONENTS = 6
 
+# 전역 변수로 선언 (명령줄 인자로 재설정 가능)
+_SANIT_ROOT = SANIT_ROOT
+_RESULT_DIR = RESULT_DIR
+
 fig_counter = 0  # 그래프 저장 순서 카운터
 
 
 def save_fig(fig, name):
-    """그래프를 RESULT_DIR에 저장하고 화면에도 표시"""
+    """그래프를 _RESULT_DIR에 저장하고 화면에도 표시"""
     global fig_counter
     fig_counter += 1
-    filepath = os.path.join(RESULT_DIR, f'{fig_counter:02d}_{name}.png')
+    filepath = os.path.join(_RESULT_DIR, f'{fig_counter:02d}_{name}.png')
     fig.savefig(filepath, dpi=150, bbox_inches='tight')
     print(f'  → 저장: {filepath}')
     plt.show()
@@ -130,13 +141,28 @@ def compute_full_energy_matrix(pca_streams, n_components, wavelet, actual_level)
 # 메인 실행
 # =============================================================================
 def main():
-    print(f'결과 저장 경로: {RESULT_DIR}')
+    global _SANIT_ROOT, _RESULT_DIR, fig_counter
+
+    parser = argparse.ArgumentParser(description="DWT Feature Extraction 파이프라인 시각화")
+    parser.add_argument("--sanit-dir", type=str, default=SANIT_ROOT,
+                       help=f"Sanitization NPZ 디렉토리 (default: {SANIT_ROOT})")
+    parser.add_argument("--out-dir", type=str, default=RESULT_DIR,
+                       help=f"출력 디렉토리 (default: {RESULT_DIR})")
+    args = parser.parse_args()
+
+    _SANIT_ROOT = args.sanit_dir
+    _RESULT_DIR = args.out_dir
+    fig_counter = 0
+
+    os.makedirs(_RESULT_DIR, exist_ok=True)
+
+    print(f'결과 저장 경로: {_RESULT_DIR}')
     print('=' * 60)
 
     # NPZ 파일 목록 수집
-    npz_files = sorted(glob.glob(os.path.join(SANIT_ROOT, '*.npz')))
+    npz_files = sorted(glob.glob(os.path.join(_SANIT_ROOT, '*.npz')))
     if not npz_files:
-        print(f'경고: {SANIT_ROOT} 에서 npz 파일을 찾을 수 없습니다.')
+        print(f'경고: {_SANIT_ROOT} 에서 npz 파일을 찾을 수 없습니다.')
         return
 
     # big / small 분류
@@ -540,7 +566,7 @@ def main():
     save_fig(fig, 'step6_avg_energy_comparison')
 
     print('\n' + '=' * 60)
-    print(f'모든 시각화 완료! 저장 위치: {RESULT_DIR}')
+    print(f'모든 시각화 완료! 저장 위치: {_RESULT_DIR}')
     print(f'총 {fig_counter}개 그래프 저장됨')
 
 

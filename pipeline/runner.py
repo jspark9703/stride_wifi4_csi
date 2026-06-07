@@ -66,7 +66,7 @@ def get_dirs(cfg: dict) -> dict:
        → _ablation_param 로 영향 스텝 계산,
          영향 스텝은 sweep 경로, 나머지는 baseline 재사용
     """
-    date_tag       = cfg["experiment"].get("date_tag", "")
+    date_tag       = str(cfg["experiment"].get("date_tag", ""))
     exp_name       = cfg["experiment"]["name"]
     method         = cfg["feature_extraction"]["method"]
     sweep_name     = cfg["experiment"].get("_sweep_name")

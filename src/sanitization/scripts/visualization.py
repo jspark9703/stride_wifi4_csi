@@ -4,6 +4,8 @@ import ast
 import asyncio
 import time
 import json
+import argparse
+import warnings
 from functools import partial
 from concurrent.futures import ProcessPoolExecutor
 from datetime import datetime
@@ -13,18 +15,30 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 # ==========================================
+# 경고 필터링
+# ==========================================
+warnings.filterwarnings('ignore', message='.*Mean of empty slice.*')
+warnings.filterwarnings('ignore', category=RuntimeWarning)
+
+# ==========================================
 # CONFIGURATION PARAMETERS
 # ==========================================
 HIST_BINS = 100
 HIST_RANGE = (0, 40)
 
-BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 RAW_DIR = os.path.join(BASE_DIR, "data", "raw")
 PREPROCESSED_DIR = os.path.join(BASE_DIR, "data", "sanitization", "preprocessed")
 SANITIZATION_DIR = os.path.join(BASE_DIR, "data", "sanitization", "sanitization")
 RESULT_DIR = os.path.join(BASE_DIR, "data", "result", "sanitization")
 JSON_LOG_DIR = os.path.join(RESULT_DIR, "json")
 PLOTS_DIR = os.path.join(RESULT_DIR, "plots")
+
+# 전역 변수로 선언 (명령줄 인자로 재설정 가능)
+_RAW_DIR = RAW_DIR
+_PREPROCESSED_DIR = PREPROCESSED_DIR
+_SANITIZATION_DIR = SANITIZATION_DIR
+_PLOTS_DIR = PLOTS_DIR
 
 def ensure_dir(path):
     if not os.path.exists(path):    
@@ -334,4 +348,29 @@ async def run_visualization(raw_dir=RAW_DIR, prep_dir=PREPROCESSED_DIR, sanit_di
     print("[Visualization] Outputs saved to data/plots/sanitization/ successfully.")
 
 if __name__ == "__main__":
-    asyncio.run(run_visualization())
+    parser = argparse.ArgumentParser(description="Sanitization Visualization")
+    parser.add_argument("--raw-dir", type=str, default=RAW_DIR,
+                       help=f"Raw CSV 디렉토리 (default: {RAW_DIR})")
+    parser.add_argument("--prep-dir", type=str, default=PREPROCESSED_DIR,
+                       help=f"Preprocessed NPZ 디렉토리 (default: {PREPROCESSED_DIR})")
+    parser.add_argument("--sanit-dir", type=str, default=SANITIZATION_DIR,
+                       help=f"Sanitization NPZ 디렉토리 (default: {SANITIZATION_DIR})")
+    parser.add_argument("--plots-dir", type=str, default=PLOTS_DIR,
+                       help=f"출력 플롯 디렉토리 (default: {PLOTS_DIR})")
+    parser.add_argument("--json-dir", type=str, default=JSON_LOG_DIR,
+                       help=f"로그 JSON 디렉토리 (default: {JSON_LOG_DIR})")
+    parser.add_argument("--run-id", type=str, default=None,
+                       help="특정 run_id의 로그 사용 (선택사항)")
+    args = parser.parse_args()
+
+    os.makedirs(args.plots_dir, exist_ok=True)
+    os.makedirs(args.json_dir, exist_ok=True)
+
+    asyncio.run(run_visualization(
+        raw_dir=args.raw_dir,
+        prep_dir=args.prep_dir,
+        sanit_dir=args.sanit_dir,
+        plots_dir=args.plots_dir,
+        json_dir=args.json_dir,
+        run_id=args.run_id
+    ))

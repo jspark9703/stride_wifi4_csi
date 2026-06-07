@@ -1,0 +1,1497 @@
+{
+    "execution_timestamp": "2026-05-26T02:14:58.974885",
+    "pipeline_stage": "visualization",
+    "summary": {
+        "total_files": 371,
+        "success": 0,
+        "failed": 371,
+        "execution_time_sec": 131.9
+    },
+    "visualized_metrics": {},
+    "failures": [
+        {
+            "file": "csi_260429_232913_jinyoung_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_232913_jinyoung_big.npz"
+        },
+        {
+            "file": "csi_260429_232923_jinyoung_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_232923_jinyoung_big.npz"
+        },
+        {
+            "file": "csi_260429_232932_jinyoung_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_232932_jinyoung_big.npz"
+        },
+        {
+            "file": "csi_260429_232942_jinyoung_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_232942_jinyoung_big.npz"
+        },
+        {
+            "file": "csi_260429_233021_jinyoung_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_233021_jinyoung_big.npz"
+        },
+        {
+            "file": "csi_260429_233012_jinyoung_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_233012_jinyoung_big.npz"
+        },
+        {
+            "file": "csi_260429_233002_jinyoung_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_233002_jinyoung_big.npz"
+        },
+        {
+            "file": "csi_260429_233041_jinyoung_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_233041_jinyoung_big.npz"
+        },
+        {
+            "file": "csi_260429_233031_jinyoung_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_233031_jinyoung_big.npz"
+        },
+        {
+            "file": "csi_260429_233112_jinyoung_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_233112_jinyoung_big.npz"
+        },
+        {
+            "file": "csi_260429_233122_jinyoung_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_233122_jinyoung_big.npz"
+        },
+        {
+            "file": "csi_260429_232952_jinyoung_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_232952_jinyoung_big.npz"
+        },
+        {
+            "file": "csi_260429_233051_jinyoung_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_233051_jinyoung_big.npz"
+        },
+        {
+            "file": "csi_260429_233143_jinyoung_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_233143_jinyoung_big.npz"
+        },
+        {
+            "file": "csi_260429_233154_jinyoung_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_233154_jinyoung_big.npz"
+        },
+        {
+            "file": "csi_260429_233226_jinyoung_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_233226_jinyoung_big.npz"
+        },
+        {
+            "file": "csi_260429_233101_jinyoung_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_233101_jinyoung_big.npz"
+        },
+        {
+            "file": "csi_260429_233205_jinyoung_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_233205_jinyoung_big.npz"
+        },
+        {
+            "file": "csi_260429_233133_jinyoung_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_233133_jinyoung_big.npz"
+        },
+        {
+            "file": "csi_260429_233236_jinyoung_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_233236_jinyoung_big.npz"
+        },
+        {
+            "file": "csi_260429_233257_jinyoung_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_233257_jinyoung_big.npz"
+        },
+        {
+            "file": "csi_260429_233351_jinyoung_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_233351_jinyoung_big.npz"
+        },
+        {
+            "file": "csi_260429_233215_jinyoung_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_233215_jinyoung_big.npz"
+        },
+        {
+            "file": "csi_260429_233329_jinyoung_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_233329_jinyoung_big.npz"
+        },
+        {
+            "file": "csi_260429_233340_jinyoung_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_233340_jinyoung_big.npz"
+        },
+        {
+            "file": "csi_260429_233308_jinyoung_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_233308_jinyoung_big.npz"
+        },
+        {
+            "file": "csi_260429_233318_jinyoung_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_233318_jinyoung_big.npz"
+        },
+        {
+            "file": "csi_260429_233413_jinyoung_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_233413_jinyoung_big.npz"
+        },
+        {
+            "file": "csi_260429_233247_jinyoung_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_233247_jinyoung_big.npz"
+        },
+        {
+            "file": "csi_260429_233538_jinyoung_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_233538_jinyoung_big.npz"
+        },
+        {
+            "file": "csi_260429_233456_jinyoung_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_233456_jinyoung_big.npz"
+        },
+        {
+            "file": "csi_260429_233548_jinyoung_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_233548_jinyoung_big.npz"
+        },
+        {
+            "file": "csi_260429_233446_jinyoung_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_233446_jinyoung_big.npz"
+        },
+        {
+            "file": "csi_260429_233559_jinyoung_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_233559_jinyoung_big.npz"
+        },
+        {
+            "file": "csi_260429_233425_jinyoung_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_233425_jinyoung_big.npz"
+        },
+        {
+            "file": "csi_260429_233507_jinyoung_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_233507_jinyoung_big.npz"
+        },
+        {
+            "file": "csi_260429_233618_jinyoung_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_233618_jinyoung_small.npz"
+        },
+        {
+            "file": "csi_260429_233528_jinyoung_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_233528_jinyoung_big.npz"
+        },
+        {
+            "file": "csi_260429_233517_jinyoung_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_233517_jinyoung_big.npz"
+        },
+        {
+            "file": "csi_260429_233435_jinyoung_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_233435_jinyoung_big.npz"
+        },
+        {
+            "file": "csi_260429_233655_jinyoung_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_233655_jinyoung_small.npz"
+        },
+        {
+            "file": "csi_260429_233631_jinyoung_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_233631_jinyoung_small.npz"
+        },
+        {
+            "file": "csi_260429_233643_jinyoung_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_233643_jinyoung_small.npz"
+        },
+        {
+            "file": "csi_260429_233708_jinyoung_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_233708_jinyoung_small.npz"
+        },
+        {
+            "file": "csi_260429_233849_jinyoung_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_233849_jinyoung_small.npz"
+        },
+        {
+            "file": "csi_260429_233402_jinyoung_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_233402_jinyoung_big.npz"
+        },
+        {
+            "file": "csi_260429_233733_jinyoung_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_233733_jinyoung_small.npz"
+        },
+        {
+            "file": "csi_260429_233758_jinyoung_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_233758_jinyoung_small.npz"
+        },
+        {
+            "file": "csi_260429_233746_jinyoung_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_233746_jinyoung_small.npz"
+        },
+        {
+            "file": "csi_260429_233720_jinyoung_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_233720_jinyoung_small.npz"
+        },
+        {
+            "file": "csi_260429_233811_jinyoung_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_233811_jinyoung_small.npz"
+        },
+        {
+            "file": "csi_260429_233914_jinyoung_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_233914_jinyoung_small.npz"
+        },
+        {
+            "file": "csi_260429_233836_jinyoung_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_233836_jinyoung_small.npz"
+        },
+        {
+            "file": "csi_260429_233940_jinyoung_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_233940_jinyoung_small.npz"
+        },
+        {
+            "file": "csi_260429_233901_jinyoung_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_233901_jinyoung_small.npz"
+        },
+        {
+            "file": "csi_260429_234008_jinyoung_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_234008_jinyoung_small.npz"
+        },
+        {
+            "file": "csi_260429_233954_jinyoung_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_233954_jinyoung_small.npz"
+        },
+        {
+            "file": "csi_260429_234045_jinyoung_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_234045_jinyoung_small.npz"
+        },
+        {
+            "file": "csi_260429_234020_jinyoung_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_234020_jinyoung_small.npz"
+        },
+        {
+            "file": "csi_260429_234111_jinyoung_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_234111_jinyoung_small.npz"
+        },
+        {
+            "file": "csi_260429_233824_jinyoung_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_233824_jinyoung_small.npz"
+        },
+        {
+            "file": "csi_260429_233927_jinyoung_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_233927_jinyoung_small.npz"
+        },
+        {
+            "file": "csi_260429_234033_jinyoung_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_234033_jinyoung_small.npz"
+        },
+        {
+            "file": "csi_260429_234204_jinyoung_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_234204_jinyoung_small.npz"
+        },
+        {
+            "file": "csi_260429_234124_jinyoung_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_234124_jinyoung_small.npz"
+        },
+        {
+            "file": "csi_260429_234151_jinyoung_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_234151_jinyoung_small.npz"
+        },
+        {
+            "file": "csi_260429_234230_jinyoung_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_234230_jinyoung_small.npz"
+        },
+        {
+            "file": "csi_260429_234259_jinyoung_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_234259_jinyoung_small.npz"
+        },
+        {
+            "file": "csi_260429_234058_jinyoung_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_234058_jinyoung_small.npz"
+        },
+        {
+            "file": "csi_260429_234324_jinyoung_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_234324_jinyoung_small.npz"
+        },
+        {
+            "file": "csi_260429_234312_jinyoung_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_234312_jinyoung_small.npz"
+        },
+        {
+            "file": "csi_260429_234138_jinyoung_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_234138_jinyoung_small.npz"
+        },
+        {
+            "file": "csi_260429_234217_jinyoung_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_234217_jinyoung_small.npz"
+        },
+        {
+            "file": "csi_260429_234441_jinyoung_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_234441_jinyoung_small.npz"
+        },
+        {
+            "file": "csi_260429_234428_jinyoung_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_234428_jinyoung_small.npz"
+        },
+        {
+            "file": "csi_260429_234350_jinyoung_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_234350_jinyoung_small.npz"
+        },
+        {
+            "file": "csi_260429_234416_jinyoung_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_234416_jinyoung_small.npz"
+        },
+        {
+            "file": "csi_260429_234538_heewon_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_234538_heewon_small.npz"
+        },
+        {
+            "file": "csi_260429_234337_jinyoung_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_234337_jinyoung_small.npz"
+        },
+        {
+            "file": "csi_260429_234244_jinyoung_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_234244_jinyoung_small.npz"
+        },
+        {
+            "file": "csi_260429_234701_heewon_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_234701_heewon_small.npz"
+        },
+        {
+            "file": "csi_260429_234403_jinyoung_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_234403_jinyoung_small.npz"
+        },
+        {
+            "file": "csi_260429_234624_heewon_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_234624_heewon_small.npz"
+        },
+        {
+            "file": "csi_260429_234554_heewon_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_234554_heewon_small.npz"
+        },
+        {
+            "file": "csi_260429_234730_heewon_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_234730_heewon_small.npz"
+        },
+        {
+            "file": "csi_260429_234746_heewon_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_234746_heewon_small.npz"
+        },
+        {
+            "file": "csi_260429_234645_heewon_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_234645_heewon_small.npz"
+        },
+        {
+            "file": "csi_260429_234609_heewon_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_234609_heewon_small.npz"
+        },
+        {
+            "file": "csi_260429_234715_heewon_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_234715_heewon_small.npz"
+        },
+        {
+            "file": "csi_260429_234833_heewon_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_234833_heewon_small.npz"
+        },
+        {
+            "file": "csi_260429_234801_heewon_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_234801_heewon_small.npz"
+        },
+        {
+            "file": "csi_260429_234904_heewon_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_234904_heewon_small.npz"
+        },
+        {
+            "file": "csi_260429_234817_heewon_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_234817_heewon_small.npz"
+        },
+        {
+            "file": "csi_260429_234919_heewon_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_234919_heewon_small.npz"
+        },
+        {
+            "file": "csi_260429_235021_heewon_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_235021_heewon_small.npz"
+        },
+        {
+            "file": "csi_260429_234934_heewon_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_234934_heewon_small.npz"
+        },
+        {
+            "file": "csi_260429_235036_heewon_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_235036_heewon_small.npz"
+        },
+        {
+            "file": "csi_260429_234949_heewon_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_234949_heewon_small.npz"
+        },
+        {
+            "file": "csi_260429_234848_heewon_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_234848_heewon_small.npz"
+        },
+        {
+            "file": "csi_260429_235052_heewon_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_235052_heewon_small.npz"
+        },
+        {
+            "file": "csi_260429_235005_heewon_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_235005_heewon_small.npz"
+        },
+        {
+            "file": "csi_260429_235139_heewon_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_235139_heewon_small.npz"
+        },
+        {
+            "file": "csi_260429_235107_heewon_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_235107_heewon_small.npz"
+        },
+        {
+            "file": "csi_260429_235123_heewon_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_235123_heewon_small.npz"
+        },
+        {
+            "file": "csi_260429_235209_heewon_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_235209_heewon_small.npz"
+        },
+        {
+            "file": "csi_260429_235154_heewon_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_235154_heewon_small.npz"
+        },
+        {
+            "file": "csi_260429_235340_heewon_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_235340_heewon_small.npz"
+        },
+        {
+            "file": "csi_260429_235224_heewon_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_235224_heewon_small.npz"
+        },
+        {
+            "file": "csi_260429_235239_heewon_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_235239_heewon_small.npz"
+        },
+        {
+            "file": "csi_260429_235326_heewon_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_235326_heewon_small.npz"
+        },
+        {
+            "file": "csi_260429_235255_heewon_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_235255_heewon_small.npz"
+        },
+        {
+            "file": "csi_260429_235440_heewon_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_235440_heewon_small.npz"
+        },
+        {
+            "file": "csi_260429_235609_heewon_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_235609_heewon_big.npz"
+        },
+        {
+            "file": "csi_260429_235619_heewon_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_235619_heewon_big.npz"
+        },
+        {
+            "file": "csi_260429_235510_heewon_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_235510_heewon_small.npz"
+        },
+        {
+            "file": "csi_260429_235310_heewon_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_235310_heewon_small.npz"
+        },
+        {
+            "file": "csi_260429_235559_heewon_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_235559_heewon_big.npz"
+        },
+        {
+            "file": "csi_260429_235354_heewon_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_235354_heewon_small.npz"
+        },
+        {
+            "file": "csi_260429_235455_heewon_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_235455_heewon_small.npz"
+        },
+        {
+            "file": "csi_260429_235424_heewon_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_235424_heewon_small.npz"
+        },
+        {
+            "file": "csi_260429_235709_heewon_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_235709_heewon_big.npz"
+        },
+        {
+            "file": "csi_260429_235628_heewon_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_235628_heewon_big.npz"
+        },
+        {
+            "file": "csi_260429_235637_heewon_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_235637_heewon_big.npz"
+        },
+        {
+            "file": "csi_260429_235539_heewon_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_235539_heewon_small.npz"
+        },
+        {
+            "file": "csi_260429_235658_heewon_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_235658_heewon_big.npz"
+        },
+        {
+            "file": "csi_260429_235409_heewon_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_235409_heewon_small.npz"
+        },
+        {
+            "file": "csi_260429_235718_heewon_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_235718_heewon_big.npz"
+        },
+        {
+            "file": "csi_260429_235738_heewon_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_235738_heewon_big.npz"
+        },
+        {
+            "file": "csi_260429_235647_heewon_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_235647_heewon_big.npz"
+        },
+        {
+            "file": "csi_260429_235748_heewon_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_235748_heewon_big.npz"
+        },
+        {
+            "file": "csi_260429_235827_heewon_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_235827_heewon_big.npz"
+        },
+        {
+            "file": "csi_260429_235846_heewon_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_235846_heewon_big.npz"
+        },
+        {
+            "file": "csi_260429_235837_heewon_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_235837_heewon_big.npz"
+        },
+        {
+            "file": "csi_260429_235524_heewon_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_235524_heewon_small.npz"
+        },
+        {
+            "file": "csi_260429_235807_heewon_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_235807_heewon_big.npz"
+        },
+        {
+            "file": "csi_260429_235758_heewon_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_235758_heewon_big.npz"
+        },
+        {
+            "file": "csi_260429_235856_heewon_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_235856_heewon_big.npz"
+        },
+        {
+            "file": "csi_260429_235926_heewon_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_235926_heewon_big.npz"
+        },
+        {
+            "file": "csi_260429_235906_heewon_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_235906_heewon_big.npz"
+        },
+        {
+            "file": "csi_260429_235728_heewon_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_235728_heewon_big.npz"
+        },
+        {
+            "file": "csi_260429_235817_heewon_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_235817_heewon_big.npz"
+        },
+        {
+            "file": "csi_260429_235945_heewon_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_235945_heewon_big.npz"
+        },
+        {
+            "file": "csi_260429_235935_heewon_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_235935_heewon_big.npz"
+        },
+        {
+            "file": "csi_260429_235955_heewon_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_235955_heewon_big.npz"
+        },
+        {
+            "file": "csi_260430_000034_heewon_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_000034_heewon_big.npz"
+        },
+        {
+            "file": "csi_260430_000024_heewon_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_000024_heewon_big.npz"
+        },
+        {
+            "file": "csi_260430_000126_heewon_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_000126_heewon_big.npz"
+        },
+        {
+            "file": "csi_260429_235916_heewon_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260429_235916_heewon_big.npz"
+        },
+        {
+            "file": "csi_260430_000054_heewon_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_000054_heewon_big.npz"
+        },
+        {
+            "file": "csi_260430_000004_heewon_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_000004_heewon_big.npz"
+        },
+        {
+            "file": "csi_260430_000044_heewon_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_000044_heewon_big.npz"
+        },
+        {
+            "file": "csi_260430_000215_heewon_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_000215_heewon_big.npz"
+        },
+        {
+            "file": "csi_260430_000205_heewon_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_000205_heewon_big.npz"
+        },
+        {
+            "file": "csi_260430_000014_heewon_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_000014_heewon_big.npz"
+        },
+        {
+            "file": "csi_260430_000135_heewon_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_000135_heewon_big.npz"
+        },
+        {
+            "file": "csi_260430_000224_heewon_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_000224_heewon_big.npz"
+        },
+        {
+            "file": "csi_260430_000155_heewon_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_000155_heewon_big.npz"
+        },
+        {
+            "file": "csi_260430_000234_heewon_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_000234_heewon_big.npz"
+        },
+        {
+            "file": "csi_260430_000145_heewon_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_000145_heewon_big.npz"
+        },
+        {
+            "file": "csi_260430_015652_minhyeok_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_015652_minhyeok_big.npz"
+        },
+        {
+            "file": "csi_260430_015742_minhyeok_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_015742_minhyeok_big.npz"
+        },
+        {
+            "file": "csi_260430_015728_minhyeok_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_015728_minhyeok_big.npz"
+        },
+        {
+            "file": "csi_260430_000243_heewon_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_000243_heewon_big.npz"
+        },
+        {
+            "file": "csi_260430_015757_minhyeok_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_015757_minhyeok_big.npz"
+        },
+        {
+            "file": "csi_260430_000253_heewon_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_000253_heewon_big.npz"
+        },
+        {
+            "file": "csi_260430_015811_minhyeok_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_015811_minhyeok_big.npz"
+        },
+        {
+            "file": "csi_260430_015750_minhyeok_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_015750_minhyeok_big.npz"
+        },
+        {
+            "file": "csi_260430_015722_minhyeok_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_015722_minhyeok_big.npz"
+        },
+        {
+            "file": "csi_260430_015824_minhyeok_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_015824_minhyeok_big.npz"
+        },
+        {
+            "file": "csi_260430_015817_minhyeok_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_015817_minhyeok_big.npz"
+        },
+        {
+            "file": "csi_260430_015804_minhyeok_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_015804_minhyeok_big.npz"
+        },
+        {
+            "file": "csi_260430_015857_minhyeok_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_015857_minhyeok_big.npz"
+        },
+        {
+            "file": "csi_260430_015838_minhyeok_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_015838_minhyeok_big.npz"
+        },
+        {
+            "file": "csi_260430_015850_minhyeok_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_015850_minhyeok_big.npz"
+        },
+        {
+            "file": "csi_260430_015831_minhyeok_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_015831_minhyeok_big.npz"
+        },
+        {
+            "file": "csi_260430_015844_minhyeok_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_015844_minhyeok_big.npz"
+        },
+        {
+            "file": "csi_260430_015903_minhyeok_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_015903_minhyeok_big.npz"
+        },
+        {
+            "file": "csi_260430_015910_minhyeok_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_015910_minhyeok_big.npz"
+        },
+        {
+            "file": "csi_260430_015916_minhyeok_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_015916_minhyeok_big.npz"
+        },
+        {
+            "file": "csi_260430_015922_minhyeok_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_015922_minhyeok_big.npz"
+        },
+        {
+            "file": "csi_260430_015928_minhyeok_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_015928_minhyeok_big.npz"
+        },
+        {
+            "file": "csi_260430_015935_minhyeok_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_015935_minhyeok_big.npz"
+        },
+        {
+            "file": "csi_260430_020000_minhyeok_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_020000_minhyeok_big.npz"
+        },
+        {
+            "file": "csi_260430_020019_minhyeok_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_020019_minhyeok_big.npz"
+        },
+        {
+            "file": "csi_260430_015941_minhyeok_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_015941_minhyeok_big.npz"
+        },
+        {
+            "file": "csi_260430_015954_minhyeok_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_015954_minhyeok_big.npz"
+        },
+        {
+            "file": "csi_260430_015947_minhyeok_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_015947_minhyeok_big.npz"
+        },
+        {
+            "file": "csi_260430_020025_minhyeok_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_020025_minhyeok_big.npz"
+        },
+        {
+            "file": "csi_260430_020013_minhyeok_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_020013_minhyeok_big.npz"
+        },
+        {
+            "file": "csi_260430_020039_minhyeok_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_020039_minhyeok_big.npz"
+        },
+        {
+            "file": "csi_260430_020051_minhyeok_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_020051_minhyeok_big.npz"
+        },
+        {
+            "file": "csi_260430_020032_minhyeok_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_020032_minhyeok_big.npz"
+        },
+        {
+            "file": "csi_260430_020007_minhyeok_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_020007_minhyeok_big.npz"
+        },
+        {
+            "file": "csi_260430_020122_minhyeok_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_020122_minhyeok_big.npz"
+        },
+        {
+            "file": "csi_260430_020104_minhyeok_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_020104_minhyeok_big.npz"
+        },
+        {
+            "file": "csi_260430_020110_minhyeok_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_020110_minhyeok_big.npz"
+        },
+        {
+            "file": "csi_260430_020128_minhyeok_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_020128_minhyeok_big.npz"
+        },
+        {
+            "file": "csi_260430_020141_minhyeok_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_020141_minhyeok_big.npz"
+        },
+        {
+            "file": "csi_260430_020234_minhyeok_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_020234_minhyeok_big.npz"
+        },
+        {
+            "file": "csi_260430_020045_minhyeok_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_020045_minhyeok_big.npz"
+        },
+        {
+            "file": "csi_260430_020135_minhyeok_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_020135_minhyeok_big.npz"
+        },
+        {
+            "file": "csi_260430_020241_minhyeok_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_020241_minhyeok_big.npz"
+        },
+        {
+            "file": "csi_260430_020502_minhyeok_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_020502_minhyeok_big.npz"
+        },
+        {
+            "file": "csi_260430_020058_minhyeok_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_020058_minhyeok_big.npz"
+        },
+        {
+            "file": "csi_260430_020116_minhyeok_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_020116_minhyeok_big.npz"
+        },
+        {
+            "file": "csi_260430_020349_minhyeok_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_020349_minhyeok_big.npz"
+        },
+        {
+            "file": "csi_260430_020554_minhyeok_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_020554_minhyeok_big.npz"
+        },
+        {
+            "file": "csi_260430_020513_minhyeok_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_020513_minhyeok_big.npz"
+        },
+        {
+            "file": "csi_260430_020547_minhyeok_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_020547_minhyeok_big.npz"
+        },
+        {
+            "file": "csi_260430_020534_minhyeok_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_020534_minhyeok_big.npz"
+        },
+        {
+            "file": "csi_260430_020520_minhyeok_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_020520_minhyeok_big.npz"
+        },
+        {
+            "file": "csi_260430_020527_minhyeok_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_020527_minhyeok_big.npz"
+        },
+        {
+            "file": "csi_260430_020541_minhyeok_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_020541_minhyeok_big.npz"
+        },
+        {
+            "file": "csi_260430_020607_minhyeok_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_020607_minhyeok_big.npz"
+        },
+        {
+            "file": "csi_260430_020626_minhyeok_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_020626_minhyeok_big.npz"
+        },
+        {
+            "file": "csi_260430_020620_minhyeok_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_020620_minhyeok_big.npz"
+        },
+        {
+            "file": "csi_260430_020600_minhyeok_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_020600_minhyeok_big.npz"
+        },
+        {
+            "file": "csi_260430_020613_minhyeok_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_020613_minhyeok_big.npz"
+        },
+        {
+            "file": "csi_260430_020856_minhyeok_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_020856_minhyeok_small.npz"
+        },
+        {
+            "file": "csi_260430_020846_minhyeok_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_020846_minhyeok_small.npz"
+        },
+        {
+            "file": "csi_260430_020914_minhyeok_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_020914_minhyeok_small.npz"
+        },
+        {
+            "file": "csi_260430_020933_minhyeok_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_020933_minhyeok_small.npz"
+        },
+        {
+            "file": "csi_260430_020924_minhyeok_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_020924_minhyeok_small.npz"
+        },
+        {
+            "file": "csi_260430_020905_minhyeok_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_020905_minhyeok_small.npz"
+        },
+        {
+            "file": "csi_260430_020942_minhyeok_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_020942_minhyeok_small.npz"
+        },
+        {
+            "file": "csi_260430_020959_minhyeok_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_020959_minhyeok_small.npz"
+        },
+        {
+            "file": "csi_260430_021008_minhyeok_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_021008_minhyeok_small.npz"
+        },
+        {
+            "file": "csi_260430_021017_minhyeok_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_021017_minhyeok_small.npz"
+        },
+        {
+            "file": "csi_260430_021025_minhyeok_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_021025_minhyeok_small.npz"
+        },
+        {
+            "file": "csi_260430_020951_minhyeok_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_020951_minhyeok_small.npz"
+        },
+        {
+            "file": "csi_260430_021102_minhyeok_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_021102_minhyeok_small.npz"
+        },
+        {
+            "file": "csi_260430_021044_minhyeok_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_021044_minhyeok_small.npz"
+        },
+        {
+            "file": "csi_260430_021111_minhyeok_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_021111_minhyeok_small.npz"
+        },
+        {
+            "file": "csi_260430_021035_minhyeok_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_021035_minhyeok_small.npz"
+        },
+        {
+            "file": "csi_260430_021053_minhyeok_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_021053_minhyeok_small.npz"
+        },
+        {
+            "file": "csi_260430_021129_minhyeok_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_021129_minhyeok_small.npz"
+        },
+        {
+            "file": "csi_260430_021137_minhyeok_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_021137_minhyeok_small.npz"
+        },
+        {
+            "file": "csi_260430_021221_minhyeok_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_021221_minhyeok_small.npz"
+        },
+        {
+            "file": "csi_260430_021154_minhyeok_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_021154_minhyeok_small.npz"
+        },
+        {
+            "file": "csi_260430_021212_minhyeok_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_021212_minhyeok_small.npz"
+        },
+        {
+            "file": "csi_260430_021146_minhyeok_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_021146_minhyeok_small.npz"
+        },
+        {
+            "file": "csi_260430_021230_minhyeok_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_021230_minhyeok_small.npz"
+        },
+        {
+            "file": "csi_260430_021203_minhyeok_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_021203_minhyeok_small.npz"
+        },
+        {
+            "file": "csi_260430_021120_minhyeok_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_021120_minhyeok_small.npz"
+        },
+        {
+            "file": "csi_260430_021238_minhyeok_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_021238_minhyeok_small.npz"
+        },
+        {
+            "file": "csi_260430_021313_minhyeok_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_021313_minhyeok_small.npz"
+        },
+        {
+            "file": "csi_260430_021322_minhyeok_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_021322_minhyeok_small.npz"
+        },
+        {
+            "file": "csi_260430_021255_minhyeok_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_021255_minhyeok_small.npz"
+        },
+        {
+            "file": "csi_260430_021304_minhyeok_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_021304_minhyeok_small.npz"
+        },
+        {
+            "file": "csi_260430_021350_minhyeok_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_021350_minhyeok_small.npz"
+        },
+        {
+            "file": "csi_260430_021340_minhyeok_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_021340_minhyeok_small.npz"
+        },
+        {
+            "file": "csi_260430_021331_minhyeok_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_021331_minhyeok_small.npz"
+        },
+        {
+            "file": "csi_260430_021247_minhyeok_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_021247_minhyeok_small.npz"
+        },
+        {
+            "file": "csi_260430_021359_minhyeok_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_021359_minhyeok_small.npz"
+        },
+        {
+            "file": "csi_260430_021417_minhyeok_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_021417_minhyeok_small.npz"
+        },
+        {
+            "file": "csi_260430_021408_minhyeok_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_021408_minhyeok_small.npz"
+        },
+        {
+            "file": "csi_260430_021427_minhyeok_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_021427_minhyeok_small.npz"
+        },
+        {
+            "file": "csi_260430_021444_minhyeok_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_021444_minhyeok_small.npz"
+        },
+        {
+            "file": "csi_260430_021603_minhyeok_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_021603_minhyeok_small.npz"
+        },
+        {
+            "file": "csi_260430_021453_minhyeok_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_021453_minhyeok_small.npz"
+        },
+        {
+            "file": "csi_260430_021435_minhyeok_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_021435_minhyeok_small.npz"
+        },
+        {
+            "file": "csi_260430_021554_minhyeok_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_021554_minhyeok_small.npz"
+        },
+        {
+            "file": "csi_260430_021631_minhyeok_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_021631_minhyeok_small.npz"
+        },
+        {
+            "file": "csi_260430_021502_minhyeok_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_021502_minhyeok_small.npz"
+        },
+        {
+            "file": "csi_260430_022308_junsoo_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_022308_junsoo_big.npz"
+        },
+        {
+            "file": "csi_260430_021700_minhyeok_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_021700_minhyeok_small.npz"
+        },
+        {
+            "file": "csi_260430_021613_minhyeok_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_021613_minhyeok_small.npz"
+        },
+        {
+            "file": "csi_260430_021640_minhyeok_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_021640_minhyeok_small.npz"
+        },
+        {
+            "file": "csi_260430_021622_minhyeok_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_021622_minhyeok_small.npz"
+        },
+        {
+            "file": "csi_260430_022330_junsoo_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_022330_junsoo_big.npz"
+        },
+        {
+            "file": "csi_260430_022301_junsoo_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_022301_junsoo_big.npz"
+        },
+        {
+            "file": "csi_260430_022315_junsoo_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_022315_junsoo_big.npz"
+        },
+        {
+            "file": "csi_260430_021649_minhyeok_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_021649_minhyeok_small.npz"
+        },
+        {
+            "file": "csi_260430_022404_junsoo_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_022404_junsoo_big.npz"
+        },
+        {
+            "file": "csi_260430_022322_junsoo_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_022322_junsoo_big.npz"
+        },
+        {
+            "file": "csi_260430_022357_junsoo_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_022357_junsoo_big.npz"
+        },
+        {
+            "file": "csi_260430_022344_junsoo_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_022344_junsoo_big.npz"
+        },
+        {
+            "file": "csi_260430_021708_minhyeok_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_021708_minhyeok_small.npz"
+        },
+        {
+            "file": "csi_260430_022351_junsoo_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_022351_junsoo_big.npz"
+        },
+        {
+            "file": "csi_260430_022411_junsoo_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_022411_junsoo_big.npz"
+        },
+        {
+            "file": "csi_260430_022337_junsoo_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_022337_junsoo_big.npz"
+        },
+        {
+            "file": "csi_260430_022505_junsoo_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_022505_junsoo_big.npz"
+        },
+        {
+            "file": "csi_260430_022453_junsoo_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_022453_junsoo_big.npz"
+        },
+        {
+            "file": "csi_260430_022425_junsoo_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_022425_junsoo_big.npz"
+        },
+        {
+            "file": "csi_260430_022432_junsoo_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_022432_junsoo_big.npz"
+        },
+        {
+            "file": "csi_260430_022418_junsoo_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_022418_junsoo_big.npz"
+        },
+        {
+            "file": "csi_260430_022510_junsoo_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_022510_junsoo_big.npz"
+        },
+        {
+            "file": "csi_260430_022439_junsoo_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_022439_junsoo_big.npz"
+        },
+        {
+            "file": "csi_260430_022458_junsoo_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_022458_junsoo_big.npz"
+        },
+        {
+            "file": "csi_260430_022524_junsoo_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_022524_junsoo_big.npz"
+        },
+        {
+            "file": "csi_260430_022530_junsoo_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_022530_junsoo_big.npz"
+        },
+        {
+            "file": "csi_260430_022537_junsoo_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_022537_junsoo_big.npz"
+        },
+        {
+            "file": "csi_260430_022556_junsoo_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_022556_junsoo_big.npz"
+        },
+        {
+            "file": "csi_260430_022446_junsoo_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_022446_junsoo_big.npz"
+        },
+        {
+            "file": "csi_260430_022549_junsoo_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_022549_junsoo_big.npz"
+        },
+        {
+            "file": "csi_260430_022543_junsoo_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_022543_junsoo_big.npz"
+        },
+        {
+            "file": "csi_260430_022517_junsoo_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_022517_junsoo_big.npz"
+        },
+        {
+            "file": "csi_260430_022603_junsoo_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_022603_junsoo_big.npz"
+        },
+        {
+            "file": "csi_260430_022617_junsoo_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_022617_junsoo_big.npz"
+        },
+        {
+            "file": "csi_260430_022624_junsoo_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_022624_junsoo_big.npz"
+        },
+        {
+            "file": "csi_260430_022610_junsoo_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_022610_junsoo_big.npz"
+        },
+        {
+            "file": "csi_260430_022631_junsoo_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_022631_junsoo_big.npz"
+        },
+        {
+            "file": "csi_260430_022708_junsoo_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_022708_junsoo_big.npz"
+        },
+        {
+            "file": "csi_260430_022637_junsoo_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_022637_junsoo_big.npz"
+        },
+        {
+            "file": "csi_260430_022643_junsoo_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_022643_junsoo_big.npz"
+        },
+        {
+            "file": "csi_260430_022649_junsoo_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_022649_junsoo_big.npz"
+        },
+        {
+            "file": "csi_260430_022655_junsoo_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_022655_junsoo_big.npz"
+        },
+        {
+            "file": "csi_260430_022715_junsoo_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_022715_junsoo_big.npz"
+        },
+        {
+            "file": "csi_260430_022740_junsoo_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_022740_junsoo_big.npz"
+        },
+        {
+            "file": "csi_260430_022727_junsoo_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_022727_junsoo_big.npz"
+        },
+        {
+            "file": "csi_260430_022702_junsoo_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_022702_junsoo_big.npz"
+        },
+        {
+            "file": "csi_260430_022721_junsoo_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_022721_junsoo_big.npz"
+        },
+        {
+            "file": "csi_260430_022746_junsoo_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_022746_junsoo_big.npz"
+        },
+        {
+            "file": "csi_260430_022734_junsoo_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_022734_junsoo_big.npz"
+        },
+        {
+            "file": "csi_260430_022753_junsoo_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_022753_junsoo_big.npz"
+        },
+        {
+            "file": "csi_260430_022807_junsoo_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_022807_junsoo_big.npz"
+        },
+        {
+            "file": "csi_260430_022813_junsoo_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_022813_junsoo_big.npz"
+        },
+        {
+            "file": "csi_260430_022801_junsoo_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_022801_junsoo_big.npz"
+        },
+        {
+            "file": "csi_260430_022826_junsoo_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_022826_junsoo_big.npz"
+        },
+        {
+            "file": "csi_260430_022819_junsoo_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_022819_junsoo_big.npz"
+        },
+        {
+            "file": "csi_260430_022902_junsoo_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_022902_junsoo_small.npz"
+        },
+        {
+            "file": "csi_260430_022832_junsoo_big.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_022832_junsoo_big.npz"
+        },
+        {
+            "file": "csi_260430_022854_junsoo_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_022854_junsoo_small.npz"
+        },
+        {
+            "file": "csi_260430_022917_junsoo_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_022917_junsoo_small.npz"
+        },
+        {
+            "file": "csi_260430_022924_junsoo_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_022924_junsoo_small.npz"
+        },
+        {
+            "file": "csi_260430_022938_junsoo_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_022938_junsoo_small.npz"
+        },
+        {
+            "file": "csi_260430_022931_junsoo_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_022931_junsoo_small.npz"
+        },
+        {
+            "file": "csi_260430_022946_junsoo_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_022946_junsoo_small.npz"
+        },
+        {
+            "file": "csi_260430_022909_junsoo_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_022909_junsoo_small.npz"
+        },
+        {
+            "file": "csi_260430_023002_junsoo_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_023002_junsoo_small.npz"
+        },
+        {
+            "file": "csi_260430_023015_junsoo_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_023015_junsoo_small.npz"
+        },
+        {
+            "file": "csi_260430_022953_junsoo_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_022953_junsoo_small.npz"
+        },
+        {
+            "file": "csi_260430_023008_junsoo_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_023008_junsoo_small.npz"
+        },
+        {
+            "file": "csi_260430_023021_junsoo_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_023021_junsoo_small.npz"
+        },
+        {
+            "file": "csi_260430_023028_junsoo_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_023028_junsoo_small.npz"
+        },
+        {
+            "file": "csi_260430_023035_junsoo_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_023035_junsoo_small.npz"
+        },
+        {
+            "file": "csi_260430_023057_junsoo_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_023057_junsoo_small.npz"
+        },
+        {
+            "file": "csi_260430_023043_junsoo_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_023043_junsoo_small.npz"
+        },
+        {
+            "file": "csi_260430_023105_junsoo_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_023105_junsoo_small.npz"
+        },
+        {
+            "file": "csi_260430_023133_junsoo_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_023133_junsoo_small.npz"
+        },
+        {
+            "file": "csi_260430_023126_junsoo_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_023126_junsoo_small.npz"
+        },
+        {
+            "file": "csi_260430_023049_junsoo_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_023049_junsoo_small.npz"
+        },
+        {
+            "file": "csi_260430_023140_junsoo_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_023140_junsoo_small.npz"
+        },
+        {
+            "file": "csi_260430_023202_junsoo_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_023202_junsoo_small.npz"
+        },
+        {
+            "file": "csi_260430_023119_junsoo_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_023119_junsoo_small.npz"
+        },
+        {
+            "file": "csi_260430_023111_junsoo_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_023111_junsoo_small.npz"
+        },
+        {
+            "file": "csi_260430_023223_junsoo_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_023223_junsoo_small.npz"
+        },
+        {
+            "file": "csi_260430_023147_junsoo_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_023147_junsoo_small.npz"
+        },
+        {
+            "file": "csi_260430_023231_junsoo_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_023231_junsoo_small.npz"
+        },
+        {
+            "file": "csi_260430_023258_junsoo_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_023258_junsoo_small.npz"
+        },
+        {
+            "file": "csi_260430_023245_junsoo_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_023245_junsoo_small.npz"
+        },
+        {
+            "file": "csi_260430_023252_junsoo_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_023252_junsoo_small.npz"
+        },
+        {
+            "file": "csi_260430_023209_junsoo_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_023209_junsoo_small.npz"
+        },
+        {
+            "file": "csi_260430_023155_junsoo_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_023155_junsoo_small.npz"
+        },
+        {
+            "file": "csi_260430_023216_junsoo_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_023216_junsoo_small.npz"
+        },
+        {
+            "file": "csi_260430_023311_junsoo_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_023311_junsoo_small.npz"
+        },
+        {
+            "file": "csi_260430_023305_junsoo_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_023305_junsoo_small.npz"
+        },
+        {
+            "file": "csi_260430_023238_junsoo_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_023238_junsoo_small.npz"
+        },
+        {
+            "file": "csi_260430_023348_junsoo_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_023348_junsoo_small.npz"
+        },
+        {
+            "file": "csi_260430_023355_junsoo_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_023355_junsoo_small.npz"
+        },
+        {
+            "file": "csi_260430_023317_junsoo_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_023317_junsoo_small.npz"
+        },
+        {
+            "file": "csi_260430_023325_junsoo_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_023325_junsoo_small.npz"
+        },
+        {
+            "file": "csi_260430_023403_junsoo_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_023403_junsoo_small.npz"
+        },
+        {
+            "file": "csi_260430_023420_junsoo_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_023420_junsoo_small.npz"
+        },
+        {
+            "file": "csi_260430_023427_junsoo_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_023427_junsoo_small.npz"
+        },
+        {
+            "file": "csi_260430_023340_junsoo_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_023340_junsoo_small.npz"
+        },
+        {
+            "file": "csi_260430_023332_junsoo_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_023332_junsoo_small.npz"
+        },
+        {
+            "file": "csi_260430_023434_junsoo_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_023434_junsoo_small.npz"
+        },
+        {
+            "file": "csi_260430_023441_junsoo_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_023441_junsoo_small.npz"
+        },
+        {
+            "file": "csi_260430_023455_junsoo_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_023455_junsoo_small.npz"
+        },
+        {
+            "file": "csi_260430_023447_junsoo_small.csv",
+            "error": "Preprocessed file not found: data/ablation/baseline/preprocessed\\csi_260430_023447_junsoo_small.npz"
+        }
+    ]
+}

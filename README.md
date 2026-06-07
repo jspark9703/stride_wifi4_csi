@@ -90,7 +90,77 @@ python main.py --config configs/baseline.yaml \
 > **KEY 형식**: YAML dot-path 표기 (예: `feature_extraction.dwt.n_pca=10`)  
 > **VALUE 자동 파싱**: `true/false` → bool, 숫자 → int/float, `[..]` → list
 
-### 1-3. Ablation Sweep (`--ablation`)
+### 1-2.5. 프로토콜별 Baseline 실험 (분리 저장)
+
+#### WiFi6 5GHz (260430)
+```bash
+python main.py --config configs/baseline.yaml \
+  --set experiment.name="baseline_wifi6_5ghz" \
+  --set experiment.date_tag="260430" \
+  --set preprocessing.protocol=wifi6 \
+  --steps preprocess sanitize extract train
+```
+
+#### WiFi6 2.4GHz (260516)
+```bash
+python main.py --config configs/baseline.yaml \
+  --set experiment.name="baseline_wifi6_2.4ghz" \
+  --set experiment.date_tag="260516" \
+  --set preprocessing.protocol=wifi6 \
+  --steps preprocess sanitize extract train
+```
+
+#### WiFi4 2.4GHz (260406)
+```bash
+python main.py --config configs/baseline.yaml \
+  --set experiment.name="baseline_wifi4_2.4ghz" \
+  --set experiment.date_tag="260406" \
+  --set preprocessing.protocol=wifi4 \
+  --steps preprocess sanitize extract train
+```
+
+> **결과 저장 경로:**
+> - `results/baseline_wifi6_5ghz/`  
+> - `results/baseline_wifi6_2.4ghz/`  
+> - `results/baseline_wifi4_2.4ghz/`
+
+### 1-3. 결과 시각화 (`visualization.py`)
+
+#### DWT 특징 시각화
+```bash
+python src/feature_extraction/dwt/visualization.py \
+  --sanit-dir data/ablation/baseline/sanitization \
+  --out-dir results/baseline/visualization
+```
+
+**생성 이미지:**
+- `dwt_energy_grid.png` : Big/Small 샘플별 DWT 에너지 바 그래프
+- `dwt_energy_compare.png` : Big vs Small 평균 에너지 프로파일 비교
+- `dwt_waveform_denoise.png` : 시계열 원본/노이즈제거/재구성 비교
+- `dwt_feature_heatmap.png` : 특징 벡터 히트맵
+
+#### 전처리/정제 데이터 시각화
+```bash
+python src/sanitization/scripts/visualization.py \
+  --raw-dir data/raw/260430 \
+  --prep-dir data/ablation/baseline/preprocessed \
+  --sanit-dir data/ablation/baseline/sanitization \
+  --plots-dir results/baseline/preprocessing_plots
+```
+
+**생성 이미지:**
+- `01_interval_histogram.png` : 샘플링 간격 분포
+- `02_amplitude_statistics.png` : 진폭 통계
+- `03_phase_frequency_subplots.png` : 주파수별 위상 곡선
+
+> **인자 설명:**
+> - `--sanit-dir` : Sanitization NPZ 파일 디렉토리
+> - `--out-dir` / `--plots-dir` : 출력 이미지 저장 경로
+> - `--raw-dir`, `--prep-dir` : 원본/전처리 데이터 경로
+> 
+> 각 스크립트 상세 옵션은 `--help` 로 확인 가능
+
+### 1-5. Ablation Sweep (`--ablation`)
 
 ```bash
 python main.py --ablation configs/ablation/window_size.yaml     # 윈도우 크기 비교

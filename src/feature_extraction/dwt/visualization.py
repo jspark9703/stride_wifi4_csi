@@ -15,6 +15,8 @@ import os
 import sys
 import glob
 import random
+import argparse
+import warnings
 
 import numpy as np
 import matplotlib
@@ -25,6 +27,12 @@ from matplotlib.colors import Normalize
 from matplotlib.cm import ScalarMappable
 import pywt
 from sklearn.decomposition import PCA
+
+# ──────────────────────────────────────────
+# 경고 필터링
+# ──────────────────────────────────────────
+warnings.filterwarnings('ignore', message='.*Mean of empty slice.*')
+warnings.filterwarnings('ignore', category=RuntimeWarning)
 
 # ─── 경로 설정 ────────────────────────────────────────────────
 HERE        = os.path.dirname(os.path.abspath(__file__))
@@ -37,6 +45,10 @@ LEVEL       = 10
 N_PCA       = 6
 N_SAMPLES   = 10            # big / small 각각
 SEED        = 42
+
+# 전역 변수로 선언 (명령줄 인자로 재설정 가능)
+_SANIT_DIR = SANIT_DIR
+_OUT_DIR = OUT_DIR
 
 # ─── 스타일 ───────────────────────────────────────────────────
 BIG_COLOR   = "#EF5350"     # 빨강 계열
@@ -118,7 +130,7 @@ def load_features(npz_path, wavelet=WAVELET, level=LEVEL, n_pca=N_PCA):
 # 파일 수집
 # ══════════════════════════════════════════════════════════════
 def collect_files():
-    all_files = sorted(glob.glob(os.path.join(SANIT_DIR, "*.npz")))
+    all_files = sorted(glob.glob(os.path.join(_SANIT_DIR, "*.npz")))
     big, small = [], []
     for fp in all_files:
         stem = os.path.basename(fp).lower()
@@ -205,7 +217,7 @@ def plot_energy_grid(big_files, small_files):
     fig.text(0.02, 0.75, "BIG",   fontsize=13, color=BIG_COLOR,   fontweight="bold", va="center")
     fig.text(0.02, 0.30, "SMALL", fontsize=13, color=SMALL_COLOR, fontweight="bold", va="center")
 
-    out = os.path.join(OUT_DIR, "dwt_energy_grid.png")
+    out = os.path.join(_OUT_DIR, "dwt_energy_grid.png")
     fig.savefig(out, dpi=150, bbox_inches="tight", facecolor=BG_COLOR)
     plt.close(fig)
     print(f"  [saved] {out}")
@@ -275,7 +287,7 @@ def plot_energy_compare(big_files, small_files):
                       edgecolor=GRID_COLOR)
 
     plt.tight_layout()
-    out = os.path.join(OUT_DIR, "dwt_energy_compare.png")
+    out = os.path.join(_OUT_DIR, "dwt_energy_compare.png")
     fig.savefig(out, dpi=150, bbox_inches="tight", facecolor=BG_COLOR)
     plt.close(fig)
     print(f"  [saved] {out}")
@@ -326,7 +338,7 @@ def plot_waveform_denoise(big_files, small_files):
             ax.grid(alpha=0.3)
 
     plt.tight_layout()
-    out = os.path.join(OUT_DIR, "dwt_waveform_denoise.png")
+    out = os.path.join(_OUT_DIR, "dwt_waveform_denoise.png")
     fig.savefig(out, dpi=150, bbox_inches="tight", facecolor=BG_COLOR)
     plt.close(fig)
     print(f"  [saved] {out}")
@@ -425,7 +437,7 @@ def plot_feature_heatmap(big_files, small_files):
               labelcolor=TEXT_COLOR, fontsize=9)
 
     plt.tight_layout()
-    out = os.path.join(OUT_DIR, "dwt_feature_heatmap.png")
+    out = os.path.join(_OUT_DIR, "dwt_feature_heatmap.png")
     fig.savefig(out, dpi=150, bbox_inches="tight", facecolor=BG_COLOR)
     plt.close(fig)
     print(f"  [saved] {out}")
@@ -435,7 +447,21 @@ def plot_feature_heatmap(big_files, small_files):
 # MAIN
 # ══════════════════════════════════════════════════════════════
 def main():
-    print(f"[DWT Visualization] Loading samples from:\n  {SANIT_DIR}")
+    global _SANIT_DIR, _OUT_DIR
+
+    parser = argparse.ArgumentParser(description="DWT Feature Visualization")
+    parser.add_argument("--sanit-dir", type=str, default=SANIT_DIR,
+                       help=f"Sanitization NPZ 디렉토리 (default: {SANIT_DIR})")
+    parser.add_argument("--out-dir", type=str, default=OUT_DIR,
+                       help=f"출력 이미지 디렉토리 (default: {OUT_DIR})")
+    args = parser.parse_args()
+
+    _SANIT_DIR = args.sanit_dir
+    _OUT_DIR = args.out_dir
+
+    os.makedirs(_OUT_DIR, exist_ok=True)
+
+    print(f"[DWT Visualization] Loading samples from:\n  {_SANIT_DIR}")
     big_files, small_files = collect_files()
     print(f"  Big={len(big_files)}, Small={len(small_files)}")
 
@@ -455,7 +481,7 @@ def main():
     print("[4/4] Feature Heatmap...")
     plot_feature_heatmap(big_files, small_files)
 
-    print(f"\n[DWT Visualization] All done → {OUT_DIR}")
+    print(f"\n[DWT Visualization] All done → {_OUT_DIR}")
 
 
 if __name__ == "__main__":
